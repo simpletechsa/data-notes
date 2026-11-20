@@ -8,10 +8,14 @@ on:
     - cron: "40 8 * * 1-5"    # 16:40 Taipei Mon-Fri  - Taiwan close + money flow 台股收盤＋法人
     - cron: "50 14 * * 1-5"   # 22:50 Taipei Mon-Fri  - US open + margin 美股開盤＋融資融券
     - cron: "40 21 * * 1-5"   # 05:40 Taipei Tue-Sat  - US close 美股收盤
+    - cron: "20 1 * * 1-5"    # 09:20 Taipei - alert check
+    - cron: "1 2 * * 1-5"     # 10:00 Taipei - alert check
+    - cron: "1 4 * * 1-5"     # 12:00 Taipei - alert check
+    - cron: "15 5 * * 1-5"    # 13:15 Taipei - alert check
   workflow_dispatch:           # adds a "Run workflow" button 手動執行按鈕
     inputs:
       mode:
-        description: "asia_open / tw_close / us_open / us_close / all"
+        description: "asia_open / tw_close / us_open / us_close / alerts / all"
         default: "all"
 
 permissions:
@@ -39,6 +43,10 @@ jobs:
             "40 8 * * 1-5")  echo "mode=tw_close"  >> $GITHUB_OUTPUT ;;
             "50 14 * * 1-5") echo "mode=us_open"   >> $GITHUB_OUTPUT ;;
             "40 21 * * 1-5") echo "mode=us_close"  >> $GITHUB_OUTPUT ;;
+            "20 1 * * 1-5")  echo "mode=alerts" >> $GITHUB_OUTPUT; echo "tag=0920" >> $GITHUB_OUTPUT ;;
+            "1 2 * * 1-5")   echo "mode=alerts" >> $GITHUB_OUTPUT; echo "tag=1000" >> $GITHUB_OUTPUT ;;
+            "1 4 * * 1-5")   echo "mode=alerts" >> $GITHUB_OUTPUT; echo "tag=1200" >> $GITHUB_OUTPUT ;;
+            "15 5 * * 1-5")  echo "mode=alerts" >> $GITHUB_OUTPUT; echo "tag=1315" >> $GITHUB_OUTPUT ;;
             *)               echo "mode=all"       >> $GITHUB_OUTPUT ;;
           esac
 
@@ -46,7 +54,7 @@ jobs:
         run: pip install --quiet pandas numpy scikit-learn cryptography
 
       - name: Collect 收集資料
-        run: python3 collector/collect.py --mode ${{ steps.m.outputs.mode }}
+        run: python3 collector/collect.py --mode ${{ steps.m.outputs.mode }} --tag "${{ steps.m.outputs.tag }}"
 
       - name: Save to repo 存檔
         run: |

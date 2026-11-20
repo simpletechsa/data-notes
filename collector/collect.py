@@ -583,9 +583,11 @@ def build_daily_signals():
 # ---------------------------------------------------------------- main
 PLAN = {
     # 08:40 Taipei - Japan & Korea just opened, before Taiwan opens
-    "asia_open": ["prices", "news", "ptt", "forecast"],
+    "asia_open": ["prices", "news", "ptt", "forecast", "alerts_pre"],
+    # 09:20 / 10:00 / 12:00 / 13:15 Taipei - live alert scans of all stocks (with the news at that moment)
+    "alerts": ["news", "alerts_live"],
     # 16:40 Taipei - Taiwan closed, money-flow + revenue published
-    "tw_close": ["prices", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze", "score"],
+    "tw_close": ["prices", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze", "score", "alerts_followup"],
     # 22:50 Taipei - US just opened; TWSE margin data is out by now
     "us_open": ["prices", "twse", "news", "ptt"],
     # 05:40 Taipei - US closed: final prices + why it moved
@@ -598,6 +600,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", default="all", choices=list(PLAN))
     ap.add_argument("--backfill-days", type=int, default=0, help="also fetch this many past weekdays of TWSE data")
+    ap.add_argument("--tag", default="", help="label for live alert checks, e.g. 0920")
     ap.add_argument("--catchup-from", default=None, help="YYYY-MM-DD: force catch-up from this date (normally automatic)")
     a = ap.parse_args()
     os.makedirs(DATA, exist_ok=True)
@@ -628,6 +631,12 @@ def main():
                 done.append(run_analysis(log))
             elif step == "forecast":
                 done.append(run_script("forecast.py", log))
+            elif step == "alerts_pre":
+                done.append(run_script("alerts.py", log, ["premarket"]))
+            elif step == "alerts_live":
+                done.append(run_script("alerts.py", log, ["live", a.tag or now_tpe().strftime("%H%M")]))
+            elif step == "alerts_followup":
+                done.append(run_script("alerts.py", log, ["followup"]))
             elif step == "score":
                 done.append(run_script("forecast.py", log, ["--score"]))
         except Exception as e:
