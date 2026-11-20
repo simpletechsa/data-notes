@@ -1,0 +1,27 @@
+{
+  "_note": "Worldwide markets to track. group = when it matters. 全球市場清單。",
+  "markets": [
+    {"symbol": "^TWII",     "zh": "台灣加權指數",        "en": "Taiwan TAIEX",              "group": "taiwan"},
+    {"symbol": "TSM",       "zh": "台積電ADR",           "en": "TSMC ADR (US)",             "group": "us"},
+    {"symbol": "^SOX",      "zh": "費城半導體指數",      "en": "Philadelphia Semiconductor", "group": "us"},
+    {"symbol": "^IXIC",     "zh": "那斯達克",            "en": "Nasdaq Composite",          "group": "us"},
+    {"symbol": "^GSPC",     "zh": "標普500",             "en": "S&P 500",                   "group": "us"},
+    {"symbol": "^DJI",      "zh": "道瓊",                "en": "Dow Jones",                 "group": "us"},
+    {"symbol": "NVDA",      "zh": "輝達",                "en": "Nvidia",                    "group": "us"},
+    {"symbol": "MU",        "zh": "美光",                "en": "Micron",                    "group": "us"},
+    {"symbol": "^VIX",      "zh": "VIX恐慌指數",         "en": "VIX fear index",            "group": "risk"},
+    {"symbol": "^TNX",      "zh": "美國10年期公債殖利率", "en": "US 10Y yield",              "group": "rates"},
+    {"symbol": "^IRX",      "zh": "美國3個月國庫券殖利率(反映升降息預期)", "en": "US 3M T-bill (Fed rate expectations)", "group": "rates"},
+    {"symbol": "DX-Y.NYB",  "zh": "美元指數",            "en": "US Dollar Index",           "group": "fx"},
+    {"symbol": "TWD=X",     "zh": "美元兌台幣",          "en": "USD/TWD",                   "group": "fx"},
+    {"symbol": "CL=F",      "zh": "WTI原油",             "en": "WTI crude oil",             "group": "commodity"},
+    {"symbol": "BZ=F",      "zh": "布蘭特原油",          "en": "Brent crude oil",           "group": "commodity"},
+    {"symbol": "GC=F",      "zh": "黃金",                "en": "Gold",                      "group": "commodity"},
+    {"symbol": "^N225",     "zh": "日經225",             "en": "Nikkei 225",                "group": "asia"},
+    {"symbol": "8035.T",    "zh": "東京威力科創",        "en": "Tokyo Electron",            "group": "asia"},
+    {"symbol": "6857.T",    "zh": "愛德萬測試",          "en": "Advantest",                 "group": "asia"},
+    {"symbol": "^KS11",     "zh": "韓國KOSPI",           "en": "Korea KOSPI",               "group": "asia"},
+    {"symbol": "005930.KS", "zh": "三星電子",            "en": "Samsung Electronics",       "group": "asia"},
+    {"symbol": "000660.KS", "zh": "SK海力士",            "en": "SK Hynix",                  "group": "asia"}
+  ]
+}

@@ -1,0 +1,29 @@
+{
+ "_note": "Categories always analysed in depth, hot or not. 一律深入分析的類別。",
+ "focus": [
+  {
+   "id": "ai",
+   "zh": "AI 供應鏈",
+   "en": "AI supply chain",
+   "themes": [
+    "ai_server",
+    "server_chassis",
+    "cooling",
+    "power_supply",
+    "foundry",
+    "ic_design",
+    "adv_packaging",
+    "equipment",
+    "fab_facility",
+    "testing",
+    "dram",
+    "memory_module",
+    "ssd_nand",
+    "pcb",
+    "silicon_photonics",
+    "networking",
+    "connectors"
+   ]
+  }
+ ]
+}

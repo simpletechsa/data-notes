@@ -1,0 +1,12 @@
+{
+  "_note": "Johnny's Taiwan stocks. Starter list - will be replaced from his screenshot. market: TW = 上市, TWO = 上櫃. 自選股清單（暫定，之後依截圖更新）。",
+  "stocks": [
+    {"code": "2330", "market": "TW",  "zh": "台積電",   "en": "TSMC",              "group": "半導體 Semiconductor"},
+    {"code": "2454", "market": "TW",  "zh": "聯發科",   "en": "MediaTek",          "group": "半導體 Semiconductor"},
+    {"code": "2317", "market": "TW",  "zh": "鴻海",     "en": "Hon Hai (Foxconn)", "group": "AI伺服器 AI Server"},
+    {"code": "2382", "market": "TW",  "zh": "廣達",     "en": "Quanta",            "group": "AI伺服器 AI Server"},
+    {"code": "2408", "market": "TW",  "zh": "南亞科",   "en": "Nanya Technology",  "group": "記憶體 Memory"},
+    {"code": "2344", "market": "TW",  "zh": "華邦電",   "en": "Winbond",           "group": "記憶體 Memory"},
+    {"code": "8299", "market": "TWO", "zh": "群聯",     "en": "Phison",            "group": "記憶體 Memory"}
+  ]
+}

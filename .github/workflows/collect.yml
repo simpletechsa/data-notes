@@ -1,0 +1,58 @@
+# Runs the collector automatically 4 times a day (Taipei time) and saves the data into this repo.
+# 每天自動執行 4 次（台北時間），資料存回這個 repo。
+name: Collect
+
+on:
+  schedule:
+    - cron: "40 0 * * 1-5"    # 08:40 Taipei Mon-Fri  - Japan/Korea open 日韓開盤
+    - cron: "40 8 * * 1-5"    # 16:40 Taipei Mon-Fri  - Taiwan close + money flow 台股收盤＋法人
+    - cron: "50 14 * * 1-5"   # 22:50 Taipei Mon-Fri  - US open + margin 美股開盤＋融資融券
+    - cron: "40 21 * * 1-5"   # 05:40 Taipei Tue-Sat  - US close 美股收盤
+  workflow_dispatch:           # adds a "Run workflow" button 手動執行按鈕
+    inputs:
+      mode:
+        description: "asia_open / tw_close / us_open / us_close / all"
+        default: "all"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      DATA_KEY: ${{ secrets.DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick mode 選擇模式
+        id: m
+        run: |
+          if [ -n "${{ github.event.inputs.mode }}" ]; then echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT; exit 0; fi
+          case "${{ github.event.schedule }}" in
+            "40 0 * * 1-5")  echo "mode=asia_open" >> $GITHUB_OUTPUT ;;
+            "40 8 * * 1-5")  echo "mode=tw_close"  >> $GITHUB_OUTPUT ;;
+            "50 14 * * 1-5") echo "mode=us_open"   >> $GITHUB_OUTPUT ;;
+            "40 21 * * 1-5") echo "mode=us_close"  >> $GITHUB_OUTPUT ;;
+            *)               echo "mode=all"       >> $GITHUB_OUTPUT ;;
+          esac
+
+      - name: Install tools 安裝分析工具
+        run: pip install --quiet pandas numpy scikit-learn cryptography
+
+      - name: Collect 收集資料
+        run: python3 collector/collect.py --mode ${{ steps.m.outputs.mode }}
+
+      - name: Save to repo 存檔
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet && exit 0
+          git commit -m "data: ${{ steps.m.outputs.mode }} $(TZ=Asia/Taipei date '+%Y-%m-%d %H:%M')"
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && break; sleep 5; done

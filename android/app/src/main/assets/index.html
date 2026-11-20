@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>stsa Market Lab</title>
+<style>
+:root{--bg:#090d1a;--card:#121a30;--card2:#0d1426;--line:#202a46;--txt:#e8ebf5;--mut:#8f9ab3;--acc:#6c8cff;
+--up:#ff4d4f;--down:#22c55e;--hot:#fb923c;--warm:#facc15;--cold:#60a5fa;--warn:#fbbf24}
+body.us{--up:#22c55e;--down:#ff4d4f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:15px;line-height:1.45}
+header{position:sticky;top:0;z-index:5;background:rgba(9,13,26,.92);backdrop-filter:blur(10px);padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+header h1{font-size:18px;margin:0;flex:1;letter-spacing:.3px}header h1 small{display:block;font-size:12px;color:var(--mut);font-weight:400}
+.ib{border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:12px;height:36px;min-width:36px;padding:0 10px;font-size:14px;font-weight:600}
+main{padding:14px 14px 96px}
+.tabpage{display:none}.tabpage.on{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;background:rgba(13,20,38,.97);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:0;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0}
+nav button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8}
+nav button.on{color:var(--acc)}
+.card{background:linear-gradient(160deg,#151d36,#0f162b);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.h2{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin:18px 4px 8px;font-weight:700}
+.row{display:flex;align-items:center;gap:10px}.sp{flex:1}
+.big{font-size:30px;font-weight:800;line-height:1.1}.mid{font-size:20px;font-weight:700}
+.mut{color:var(--mut);font-size:13px}.up{color:var(--up)}.down{color:var(--down)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:var(--card2);border-radius:12px;padding:10px;text-align:center}.tile b{display:block;font-size:17px;margin-top:2px}
+.chip{display:inline-block;font-size:12px;padding:3px 9px;border-radius:99px;background:#22305a;color:#c7d2fe;margin:2px 4px 2px 0}
+.lv-hot{background:#3a2210;color:var(--hot)}.lv-warm{background:#3a3210;color:var(--warm)}.lv-cold{background:#10243a;color:var(--cold)}
+.bar{height:6px;background:#1c2540;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#6c8cff,#a78bfa)}
+.list .it{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line)}.list .it:last-child{border:0}
+.it .nm{font-weight:600}.it .cd{font-size:12px;color:var(--mut)}.it .r{text-align:right;font-variant-numeric:tabular-nums}
+.warnbox{background:#2a1d0b;border:1px solid #b45309;color:var(--warn);border-radius:14px;padding:12px;font-size:13.5px;margin-bottom:12px;font-weight:600}
+.pct{font-size:26px;font-weight:800;color:var(--warm)}.pct small{display:block;font-size:11px;color:var(--mut);font-weight:400;text-align:right}
+ul{margin:6px 0 0;padding-left:18px}li{margin:3px 0;font-size:14px}
+.range{position:relative;height:44px;margin:8px 4px 4px}.range .ln{position:absolute;top:18px;left:0;right:0;height:8px;border-radius:9px;background:#1c2540}
+.range .fill{position:absolute;top:18px;height:8px;border-radius:9px;background:linear-gradient(90deg,var(--down),var(--up))}
+.range .pc{position:absolute;top:10px;width:2px;height:24px;background:#fff}.range .lab{position:absolute;top:30px;font-size:11px;color:var(--mut);transform:translateX(-50%);white-space:nowrap}
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:3px;margin-bottom:12px}.seg button{flex:1;border:0;background:none;color:var(--mut);padding:7px;border-radius:10px;font-weight:600;font-size:13px}.seg button.on{background:var(--acc);color:#fff}
+.sheet{position:fixed;inset:0;background:#0009;z-index:20;display:none;align-items:flex-end}.sheet.on{display:flex}
+.sheet .in{background:#10172c;border-top-left-radius:22px;border-top-right-radius:22px;width:100%;max-height:85vh;overflow:auto;padding:18px 16px calc(24px + env(safe-area-inset-bottom));animation:slide .25s}
+@keyframes slide{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.grab{width:40px;height:4px;background:#334;border-radius:9px;margin:0 auto 12px}
+.empty{color:var(--mut);text-align:center;padding:26px 10px;font-size:14px}
+.status{font-size:12px;color:var(--mut);text-align:center;margin:4px 0 10px}
+.spin{animation:sp 1s linear infinite;display:inline-block}@keyframes sp{to{transform:rotate(360deg)}}
+.opt{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <h1><span data-t="app"></span><small id="hdrsub"></small></h1>
+  <button class="ib" id="btnRefresh" onclick="load(true)">⟳</button>
+  <button class="ib" onclick="openSettings()">⚙</button>
+</header>
+<main>
+  <div class="status" id="status"></div>
+  <section class="tabpage on" id="tab-today"></section>
+  <section class="tabpage" id="tab-ai"></section>
+  <section class="tabpage" id="tab-sectors"></section>
+  <section class="tabpage" id="tab-picks"></section>
+  <section class="tabpage" id="tab-paper"></section>
+</main>
+<nav id="nav"></nav>
+<div id="lock" style="display:none;position:fixed;inset:0;z-index:50;background:var(--bg);padding:40px 26px;flex-direction:column;justify-content:center">
+  <div style="font-size:44px;text-align:center">🔒</div>
+  <div class="mid" style="text-align:center;margin:10px 0 4px" id="lockTitle"></div>
+  <div class="mut" style="text-align:center;margin-bottom:22px" id="lockSub"></div>
+  <input id="pw" type="password" autocomplete="off" style="width:100%;font-size:18px;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--txt);text-align:center" onkeydown="if(event.key==='Enter')unlock()">
+  <button onclick="unlock()" id="lockBtn" style="margin-top:14px;width:100%;padding:14px;border:0;border-radius:14px;background:var(--acc);color:#fff;font-size:16px;font-weight:700"></button>
+  <div id="lockErr" style="color:var(--up);text-align:center;margin-top:12px;min-height:20px"></div>
+</div>
+<div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()"><div class="in" id="sheetIn"></div></div>
+
+<script>
+const VERSION = "__VERSION__";
+const BASE = "https://raw.githubusercontent.com/simpletechsa/data-notes/main/data/";
+const TABS = [
+  ["today", '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
+  ["ai", '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/><rect x="9.5" y="9.5" width="5" height="5"/></svg>'],
+  ["sectors", '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg>'],
+  ["picks", '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'],
+  ["paper", '<svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>'],
+];
+const T = {
+ en:{app:"stsa Market Lab",today:"Today",ai:"AI",sectors:"Sectors",picks:"Picks",paper:"Paper",
+  fc:"Morning forecast",open:"Open",close:"Close",range:"Today's range",high:"High",low:"Low",prev:"Prev close",
+  inputs:"What moved overnight",sox:"SOX (US chips)",ndx:"Nasdaq",tsm:"TSMC ADR",jp:"Nikkei",kr:"KOSPI",hynix:"SK Hynix",
+  why:"Why",sure:"How sure (backtest)",openDir:"Open direction right",closeDir:"Close direction right",
+  score:"Scorecard",scoreNone:"Tracking starts with the first forecast.",right:"right",wrong:"wrong",predicted:"Predicted",actual:"Actual",days:"days",
+  extreme:"Big moves overnight — on panic or rally days the real move is often bigger than the forecast.",
+  noFc:"No forecast yet today. It's made around 08:40 on trading days.",made:"made",
+  mood:"Market mood",hotNow:"Hottest groups",updated:"Updated",offline:"Offline — showing saved data",loading:"Loading…",fail:"Couldn't load data. Check internet and tap ⟳.",
+  aiTitle:"AI supply chain",aiAvg:"AI heat",aiIdeas:"Best AI ideas (even when AI is cold)",aiCold:"AI is cold right now — whole group is weak. Ideas are for watching.",
+  stocks:"stocks",oneM:"1-month",fiveD:"5-day",breadth:"in uptrend",heat:"Heat",all:"All",hot:"Hot",warm:"Warm",cold:"Cold",
+  lv:{hot:"🔥 Hot",warm:"🟡 Warm",cold:"❄️ Cold"},
+  trend:{strong:"Uptrend + buying",neutral:"Mixed",weak:"Downtrend"},instBuy:"institutions buying",
+  noEdge:"⚠ No proven edge yet. In testing, picks did about the same as a random stock (win {w}% vs {b}%). Treat as a watch list, not buy signals.",
+  top5:"Top 5 ideas (hot sectors only)",radar:"📡 Radar — unusual signals",noRadar:"No strong unusual signals today.",
+  chance:"chance",buy:"Buy ~",target:"Target",stop:"Stop-loss",sellBy:"Sell after {d} trading days at the latest.",signals:"Signals",
+  pp:"Paper trading (fake money)",ppClosed:"Closed",ppWin:"Win rate",ppAvg:"Avg result",ppOpen:"Holding",ppPend:"Buys at next open",ppRecent:"Recent closed",
+  ppNone:"No closed trades yet — results appear as trades finish (up to 4 weeks).",
+  st:{open:"Holding",pending:"Buy next open",win:"Target hit",loss:"Stopped out",timeout:"Time exit"},
+  acc:"Forecast accuracy",settings:"Settings",lang:"Language",colors:"Up/down colors",colTW:"Taiwan (red = up)",colUS:"US (green = up)",
+  about:"Analysis only — not investment advice.",dataFrom:"Data",lockT:"Enter password",lockS:"Only needed once on this phone.",lockB:"Unlock",lockE:"Wrong password",lockW:"Unlocking…",now:"Now",entry:"Entry",heldD:"days held",group:"Group",price:"Price"},
+ zh:{app:"stsa 市場研究室",today:"今日",ai:"AI",sectors:"產業",picks:"選股",paper:"模擬",
+  fc:"盤前預測",open:"開盤",close:"收盤",range:"今日區間",high:"最高",low:"最低",prev:"昨收",
+  inputs:"隔夜市場變化",sox:"費半",ndx:"那斯達克",tsm:"台積電ADR",jp:"日經",kr:"韓股KOSPI",hynix:"SK海力士",
+  why:"原因",sure:"準確度（回測）",openDir:"開盤方向正確率",closeDir:"收盤方向正確率",
+  score:"成績單",scoreNone:"從第一次預測開始記錄。",right:"正確",wrong:"錯誤",predicted:"預測",actual:"實際",days:"天",
+  extreme:"隔夜波動很大 — 恐慌或大漲的日子，實際幅度常比預測更大。",
+  noFc:"今天還沒有預測，交易日約 08:40 產生。",made:"產生於",
+  mood:"市場氣氛",hotNow:"最熱類別",updated:"更新",offline:"離線 — 顯示已儲存的資料",loading:"載入中…",fail:"無法載入資料，請檢查網路後按 ⟳。",
+  aiTitle:"AI 供應鏈",aiAvg:"AI 熱度",aiIdeas:"最佳 AI 標的（即使 AI 偏冷）",aiCold:"AI 目前偏冷 — 整個族群都弱，以下僅供觀察。",
+  stocks:"檔",oneM:"1個月",fiveD:"5日",breadth:"上漲趨勢",heat:"熱度",all:"全部",hot:"熱門",warm:"普通",cold:"冷門",
+  lv:{hot:"🔥 熱門",warm:"🟡 普通",cold:"❄️ 冷門"},
+  trend:{strong:"上升＋法人買",neutral:"混合",weak:"下降趨勢"},instBuy:"法人買超",
+  noEdge:"⚠ 尚未證明有效。測試中選股表現和隨便挑一檔差不多（勝率 {w}% 對 {b}%），請當作觀察名單，不是買進訊號。",
+  top5:"前 5 名（只從熱門產業挑）",radar:"📡 雷達 — 異常訊號",noRadar:"今天沒有明顯的異常訊號。",
+  chance:"機率",buy:"買進約",target:"目標價",stop:"停損價",sellBy:"最多持有 {d} 個交易日就賣出。",signals:"訊號",
+  pp:"模擬交易（假錢）",ppClosed:"已結束",ppWin:"勝率",ppAvg:"平均結果",ppOpen:"持有中",ppPend:"下個交易日開盤買進",ppRecent:"最近結束",
+  ppNone:"還沒有結束的交易 — 交易結束後（最多 4 週）就會顯示。",
+  st:{open:"持有中",pending:"下個開盤買",win:"達標",loss:"停損",timeout:"到期賣出"},
+  acc:"預測準確度",settings:"設定",lang:"語言",colors:"漲跌顏色",colTW:"台灣（紅漲綠跌）",colUS:"美國（綠漲紅跌）",
+  about:"僅供分析，不是投資建議。",dataFrom:"資料",lockT:"請輸入密碼",lockS:"這支手機只需要輸入一次。",lockB:"解鎖",lockE:"密碼錯誤",lockW:"解鎖中…",now:"現價",entry:"買進",heldD:"持有天數",group:"類別",price:"股價"}
+};
+let S = {lang: get("lang") || "en", col: get("col") || "tw", tab: "today", secFilter: "all"};
+let D = {report: null, fc: null, note: null, log: null, fetched: null, offline: false};
+
+function get(k){try{return localStorage.getItem("tsl-"+k)}catch(e){return null}}
+function put(k,v){try{localStorage.setItem("tsl-"+k,v)}catch(e){}}
+function t(k){return (T[S.lang][k]!==undefined)?T[S.lang][k]:k}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function pct(x,dec=1){if(x==null||x===""||isNaN(x))return "–";const v=x*100;return `<span class="${v>0?"up":v<0?"down":""}">${v>0?"+":""}${v.toFixed(dec)}%</span>`}
+function num(x){return (x==null||x==="")?"–":Number(x).toLocaleString("en-US",{maximumFractionDigits:2})}
+function nm(g){return S.lang==="zh"?(g.zh||g.group_zh):(g.en||g.group_en||g.zh||g.group_zh)}
+function arrow(v){return v>0?"▲":v<0?"▼":"•"}
+
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let KEY=null,RSA=null;
+async function getRSA(){if(RSA)return RSA;const k=get("rsa");if(!k)return null;RSA=await crypto.subtle.importKey("pkcs8",b64(k),{name:"RSA-OAEP",hash:"SHA-256"},false,["decrypt"]);return RSA}
+async function getKey(){if(KEY)return KEY;const k=get("k");if(!k)return null;KEY=await crypto.subtle.importKey("raw",b64(k),"AES-GCM",false,["decrypt"]);return KEY}
+async function unlock(){
+  const pw=document.getElementById("pw").value;if(!pw)return;
+  const err=document.getElementById("lockErr"),btn=document.getElementById("lockBtn");err.textContent="";btn.textContent=t("lockW");btn.disabled=true;
+  const dead=get("x")==="1";               // 3 wrong tries: locked until the app is reinstalled (shown only as "wrong password")
+  let ok=false,j=null,raw=null,v=null;
+  try{
+    v=await (await fetch("vault.json")).json();
+    const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
+    const wk=await crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt:b64(v.salt),iterations:v.iter},base,{name:"AES-GCM",length:256},false,["decrypt"]);
+    raw=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(v.nonce),additionalData:new TextEncoder().encode("vault-v"+v.v)},wk,b64(v.ct));
+    ok=true;
+  }catch(e){ok=false}
+  if(ok&&!dead){
+    if(v.v>=2){j=JSON.parse(new TextDecoder().decode(raw));put("k",j.k);put("rsa",j.rsa)}
+    else put("k",btoa(String.fromCharCode(...new Uint8Array(raw))));
+    put("n","0");KEY=null;RSA=null;
+    document.getElementById("lock").style.display="none";document.getElementById("pw").value="";load(true);
+  }else{
+    if(!dead){const n=(parseInt(get("n")||"0",10)||0)+1;put("n",String(n));if(n>=3)put("x","1")}
+    err.textContent=t("lockE");document.getElementById("pw").value="";
+  }
+  btn.textContent=t("lockB");btn.disabled=false;
+}
+function showLock(){const l=document.getElementById("lock");l.style.display="flex";
+  document.getElementById("lockTitle").textContent=t("lockT");document.getElementById("lockSub").textContent=t("lockS");document.getElementById("lockBtn").textContent=t("lockB")}
+async function fetchJ(path,isText){
+  const r=await fetch(BASE+path+".enc?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);
+  const buf=new Uint8Array(await r.arrayBuffer());let plain;
+  if(buf[0]===80&&buf[1]===49){ // "P1": sealed with the public lock (morning notes)
+    const rk=await getRSA();if(!rk)throw new Error("no rsa");
+    const L=(buf[2]<<8)|buf[3],wrapped=buf.slice(4,4+L),iv=buf.slice(4+L,16+L);
+    const ak=await crypto.subtle.importKey("raw",await crypto.subtle.decrypt({name:"RSA-OAEP"},rk,wrapped),"AES-GCM",false,["decrypt"]);
+    plain=await crypto.subtle.decrypt({name:"AES-GCM",iv},ak,buf.slice(16+L));
+  }else{
+    const key=await getKey();if(!key)throw new Error("locked");
+    try{plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(2,14)},key,buf.slice(14))}catch(e){put("k","");put("rsa","");KEY=null;showLock();throw e}
+  }
+  const txt=new TextDecoder().decode(plain);return isText?txt:JSON.parse(txt)}
+function parseCSV(txt){const lines=txt.replace(/^﻿/,"").trim().split(/\r?\n/);const h=lines.shift().split(",");return lines.map(l=>{const v=l.split(",");const o={};h.forEach((k,i)=>o[k]=v[i]);return o})}
+
+async function load(force){
+  if(!get("k")||!get("rsa")){showLock();return}
+  const btn=document.getElementById("btnRefresh");btn.innerHTML='<span class="spin">⟳</span>';
+  document.getElementById("status").textContent=t("loading");
+  try{
+    const [rep,fc,log,note]=await Promise.all([fetchJ("report/latest.json"),fetchJ("report/forecast.json").catch(()=>null),
+      fetchJ("forecast_log.csv",true).then(parseCSV).catch(()=>[]),fetchJ("report/morning_note.json").catch(()=>null)]);
+    D={report:rep,fc:fc,log:log,note:note,fetched:new Date().toISOString(),offline:false};
+    put("cache",JSON.stringify(D));
+  }catch(e){
+    const c=get("cache");if(c){D=JSON.parse(c);D.offline=true}else{D.report=null}
+  }
+  btn.textContent="⟳";render();
+}
+
+function render(){
+  document.documentElement.lang=S.lang==="zh"?"zh-Hant":"en";
+  document.body.className=S.col==="us"?"us":"";
+  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
+  document.getElementById("nav").innerHTML=TABS.map(([k,ic])=>`<button class="${S.tab===k?"on":""}" onclick="go('${k}')">${ic}<span>${t(k)}</span></button>`).join("");
+  document.querySelectorAll(".tabpage").forEach(p=>p.classList.toggle("on",p.id==="tab-"+S.tab));
+  const st=document.getElementById("status");
+  if(!D.report){st.textContent=t("fail");return}
+  const when=D.fetched?new Date(D.fetched).toLocaleString(S.lang==="zh"?"zh-TW":"en-GB",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+  st.textContent=(D.offline?t("offline")+" · ":"")+t("updated")+" "+when;
+  document.getElementById("hdrsub").textContent=t("dataFrom")+" "+D.report.date+" · v"+VERSION;
+  ({today:rToday,ai:rAI,sectors:rSectors,picks:rPicks,paper:rPaper})[S.tab]();
+}
+function go(k){S.tab=k;window.scrollTo(0,0);render()}
+
+/* ---------- TODAY ---------- */
+function rToday(){
+  const f=D.fc, el=document.getElementById("tab-today"), today=new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Taipei"});
+  let h="";
+  if(!f||f.date!==today){h+=`<div class="card"><div class="mid">${t("fc")}</div><div class="empty">${t("noFc")}</div></div>`}
+  if(f){
+    const p=f.pred,L=f.levels||{},pc=f.prev_close;
+    h+=`<div class="card"><div class="row"><div class="mid">${t("fc")}</div><div class="sp"></div><div class="mut">${esc(f.date)} · ${t("made")} ${esc(f.made_at)}</div></div>
+      <div class="grid2" style="margin-top:12px">
+       <div class="tile">${t("open")}<b class="${p.open_gap>0?"up":"down"}" style="font-size:22px">${arrow(p.open_gap)} ${(p.open_gap*100).toFixed(1)}%</b><span class="mut">~${num(L.open_gap)}</span></div>
+       <div class="tile">${t("close")}<b class="${p.close_ret>0?"up":"down"}" style="font-size:22px">${arrow(p.close_ret)} ${(p.close_ret*100).toFixed(1)}%</b><span class="mut">~${num(L.close_ret)}</span></div>
+      </div>
+      <div style="margin-top:14px" class="mut">${t("range")}</div>${rangeBar(L.low_ret,L.high_ret,pc)}`;
+    const ext=Object.values(f.inputs||{}).some(v=>v!=null&&Math.abs(v)>0.03);
+    if(ext)h+=`<div class="warnbox" style="margin:12px 0 0">${t("extreme")}</div>`;
+    h+=`</div>`;
+    h+=`<div class="h2">${t("inputs")}</div><div class="card"><div class="grid3">`+["sox","ndx","tsm","jp","kr","hynix"].map(k=>`<div class="tile"><span class="mut">${t(k)}</span><b>${pct(f.inputs[k])}</b></div>`).join("")+`</div></div>`;
+    if(D.note&&D.note.date===f.date){const w=D.note["why_"+S.lang]||D.note.why_en||[];if(w.length)h+=`<div class="h2">${t("why")}</div><div class="card"><ul>${w.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`}
+    const b=f.backtest||{};
+    h+=`<div class="h2">${t("sure")}</div><div class="card"><div class="grid2">
+      <div class="tile">${t("openDir")}<b>${Math.round((b.open_gap||{}).direction_hit*100)}%</b></div>
+      <div class="tile">${t("closeDir")}<b>${Math.round((b.close_ret||{}).direction_hit*100)}%</b></div></div></div>`;
+    const tr=f.track_record||{};
+    h+=`<div class="h2">${t("score")}</div><div class="card">`;
+    if(tr.days){const l=tr.last;
+      h+=`<div class="grid2"><div class="tile">${t("open")}<b>${tr.open_right}/${tr.days}</b></div><div class="tile">${t("close")}<b>${tr.close_right}/${tr.days}</b></div></div>`;
+      if(l)h+=`<div class="mut" style="margin-top:10px">${esc(l.date)}: ${t("open")} ${t("predicted")} ${num(l.pred_open)} → ${t("actual")} ${num(l.actual_open)} (${l.open_right==="1"||l.open_right===1?"✅ "+t("right"):"❌ "+t("wrong")}) · ${t("close")} ${num(l.pred_close)} → ${num(l.actual_close)} (${l.close_right==="1"||l.close_right===1?"✅ "+t("right"):"❌ "+t("wrong")})</div>`;
+    }else h+=`<div class="mut">${t("scoreNone")}</div>`;
+    h+=`</div>`;
+  }
+  const hot=D.report.heat.filter(x=>x.level==="hot");
+  h+=`<div class="h2">${t("mood")}</div><div class="card"><div class="mut">${t("hotNow")}</div><div style="margin-top:6px">${hot.map(x=>`<span class="chip lv-hot">${esc(nm(x))} ${pct(x.r5)}</span>`).join("")}</div>
+     <div class="mut" style="margin-top:10px">${t("aiAvg")}: <b>${Math.round(D.report.focus?.avg_heat||0)}</b>/100</div></div>`;
+  h+=`<div class="mut" style="text-align:center;margin-top:16px">${t("about")}</div>`;
+  el.innerHTML=h;
+}
+function rangeBar(lo,hi,pc){
+  if(!lo||!hi||!pc)return "";
+  const mn=Math.min(lo,pc)*0.997,mx=Math.max(hi,pc)*1.003,x=v=>((v-mn)/(mx-mn)*100).toFixed(1);
+  return `<div class="range" style="height:30px"><div class="ln" style="top:11px"></div><div class="fill" style="top:11px;left:${x(lo)}%;width:${x(hi)-x(lo)}%"></div>
+   <div class="pc" style="top:3px;left:${x(pc)}%"></div></div>
+   <div class="grid3"><div class="tile">${t("low")}<b class="down">${num(Math.round(lo))}</b></div><div class="tile">${t("high")}<b class="up">${num(Math.round(hi))}</b></div>
+   <div class="tile">${t("prev")}<b>${num(Math.round(pc))}</b></div></div>`;
+}
+
+/* ---------- AI ---------- */
+function rAI(){
+  const f=D.report.focus,el=document.getElementById("tab-ai");if(!f){el.innerHTML=`<div class="empty">–</div>`;return}
+  let h=`<div class="card"><div class="row"><div><div class="mut">${t("aiTitle")}</div><div class="big">${Math.round(f.avg_heat||0)}<span class="mut" style="font-size:14px"> /100 ${t("heat")}</span></div></div><div class="sp"></div>
+    <div class="mut" style="text-align:right">${f.stocks.length} ${t("stocks")}<br>${f.stocks.filter(s=>s.signal==="strong").length} ${t("trend").strong}</div></div></div>`;
+  if((f.avg_heat||0)<45)h+=`<div class="warnbox" style="background:#0b1a2e;border-color:#1d4ed8;color:#93c5fd">${t("aiCold")}</div>`;
+  h+=`<div class="h2">${t("aiTitle")}</div><div class="card list">`+f.heat.map(g=>{
+    const n=f.stocks.filter(s=>s.group_zh===g.zh).length;
+    return `<div class="it" onclick="openGroup('${g.gid}')"><div class="sp"><div class="nm">${esc(nm(g))}</div>
+      <div class="bar" style="margin-top:6px"><i style="width:${g.heat}%"></i></div></div>
+      <div class="r"><span class="chip lv-${g.level}">${t("lv")[g.level]}</span><div class="mut">${t("oneM")} ${pct(g.r20)}</div></div></div>`}).join("")+`</div>`;
+  if(f.picks.length)h+=`<div class="h2">${t("aiIdeas")}</div>`+f.picks.map(stockCard).join("");
+  el.innerHTML=h;
+}
+function openGroup(gid){
+  const f=D.report.focus,g=f.heat.find(x=>x.gid===gid),ss=f.stocks.filter(s=>s.group_zh===g.zh);
+  sheet(`<div class="mid">${esc(nm(g))}</div><div class="mut">${t("heat")} ${Math.round(g.heat)} · ${t("fiveD")} ${pct(g.r5)} · ${t("oneM")} ${pct(g.r20)} · ${Math.round(g.breadth*100)}% ${t("breadth")}</div>
+   <div class="list" style="margin-top:8px">`+ss.map(s=>`<div class="it" onclick='openStock(${JSON.stringify(s.code)},"focus")'>
+     <div class="sp"><div class="nm">${esc(s.name)} <span class="cd">${esc(s.code)}</span></div><div class="cd">${t("trend")[s.signal]}${s.streak?` · ${s.streak}${S.lang==="zh"?"天":"d"} ${t("instBuy")}`:""}</div></div>
+     <div class="r"><b>${num(s.price)}</b><div class="cd">${t("fiveD")} ${pct(s.r5)} · ${t("oneM")} ${pct(s.r20)}</div></div></div>`).join("")+`</div>`);
+}
+
+/* ---------- SECTORS ---------- */
+function rSectors(){
+  const el=document.getElementById("tab-sectors"),f=S.secFilter;
+  const rows=D.report.heat.filter(x=>f==="all"||x.level===f);
+  el.innerHTML=`<div class="seg">${["all","hot","warm","cold"].map(k=>`<button class="${f===k?"on":""}" onclick="S.secFilter='${k}';render()">${t(k)}</button>`).join("")}</div>
+   <div class="card list">`+rows.map(x=>`<div class="it"><div class="sp"><div class="nm">${esc(nm(x))}</div><div class="bar" style="margin-top:6px"><i style="width:${x.heat}%"></i></div>
+     <div class="cd" style="margin-top:4px">${x.n} ${t("stocks")} · ${Math.round(x.breadth*100)}% ${t("breadth")}</div></div>
+     <div class="r"><span class="chip lv-${x.level}">${t("lv")[x.level]}</span><div class="cd">${t("fiveD")} ${pct(x.r5)}</div><div class="cd">${t("oneM")} ${pct(x.r20)}</div></div></div>`).join("")+`</div>`;
+}
+
+/* ---------- PICKS ---------- */
+function stockCard(p){
+  return `<div class="card" onclick='openStock(${JSON.stringify(p.code)})'><div class="row"><div class="sp"><div class="cd">${esc(p.code)} · ${esc(p.industry)}</div>
+   <div class="mid">${esc(p.name)}</div><span class="chip">${esc(nm(p))}</span></div><div class="pct">${Math.round(p.prob*100)}%<small>${t("chance")}</small></div></div>
+   <div class="grid3" style="margin-top:8px"><div class="tile">${t("buy")}<b>${num(p.price)}</b></div><div class="tile">${t("target")}<b class="up">${num(p.target)}</b></div><div class="tile">${t("stop")}<b class="down">${num(p.stop)}</b></div></div>
+   ${(p["flags_"+S.lang]||[]).length?`<div class="mut" style="margin-top:8px;color:var(--warn)">${t("signals")}</div><ul>${p["flags_"+S.lang].map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+   ${(p["why_"+S.lang]||[]).length?`<div class="mut" style="margin-top:8px">${t("why")}</div><ul>${p["why_"+S.lang].map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}</div>`;
+}
+function rPicks(){
+  const r=D.report,st=r.stats,el=document.getElementById("tab-picks");let h="";
+  if(st.rule_ret<=0||st.auc<0.53||st.rule_win-st.base_win<0.03)h+=`<div class="warnbox">${t("noEdge").replace("{w}",Math.round(st.rule_win*100)).replace("{b}",Math.round(st.base_win*100))}</div>`;
+  h+=`<div class="h2">${t("top5")}</div>`+(r.picks.length?r.picks.map(stockCard).join(""):`<div class="empty">–</div>`);
+  h+=`<div class="mut" style="margin:-4px 4px 8px">${t("sellBy").replace("{d}",r.plan.max_days)}</div>`;
+  h+=`<div class="h2">${t("radar")}</div>`+(r.radar.length?r.radar.map(stockCard).join(""):`<div class="card empty">${t("noRadar")}</div>`);
+  el.innerHTML=h;
+}
+function openStock(code){
+  const r=D.report,all=[...r.picks,...r.radar,...(r.focus?r.focus.stocks:[])],p=all.find(x=>x.code===code);if(!p)return;
+  sheet(stockCard(p).replace('class="card"','class="card" style="border:0;background:none;padding:0"'));
+}
+
+/* ---------- PAPER ---------- */
+function rPaper(){
+  const pp=D.report.paper,el=document.getElementById("tab-paper");let h=`<div class="h2">${t("pp")}</div><div class="card">`;
+  if(pp.closed)h+=`<div class="grid3"><div class="tile">${t("ppClosed")}<b>${pp.closed}</b></div><div class="tile">${t("ppWin")}<b>${Math.round(pp.wins/pp.closed*100)}%</b></div><div class="tile">${t("ppAvg")}<b>${pct((pp.avg_ret||0)/100)}</b></div></div>`;
+  else h+=`<div class="mut">${t("ppNone")}</div>`;
+  h+=`</div>`;
+  const row=o=>`<div class="it"><div class="sp"><div class="nm">${esc(o.name)} <span class="cd">${esc(o.code)}</span></div><div class="cd">${esc(o.group)} · ${t("st")[o.status]||o.status}${o.entry_date?` · ${t("entry")} ${esc(o.entry_date)} @ ${num(o.entry_price)}`:""}</div></div>
+     <div class="r">${o.return_pct!==""&&o.return_pct!=null?pct(Number(o.return_pct)/100):"–"}${o.target?`<div class="cd">${num(o.stop)} / ${num(o.target)}</div>`:""}</div></div>`;
+  if(pp.open.length)h+=`<div class="h2">${t("ppOpen")}</div><div class="card list">${pp.open.map(row).join("")}</div>`;
+  if((pp.pending||[]).length)h+=`<div class="h2">${t("ppPend")}</div><div class="card list">${pp.pending.map(row).join("")}</div>`;
+  if((pp.recent_closed||[]).length)h+=`<div class="h2">${t("ppRecent")}</div><div class="card list">${pp.recent_closed.slice().reverse().map(row).join("")}</div>`;
+  const lg=(D.log||[]).filter(x=>x.actual_close);
+  h+=`<div class="h2">${t("acc")}</div><div class="card">`;
+  if(lg.length){const o=lg.filter(x=>x.open_right==="1").length,c=lg.filter(x=>x.close_right==="1").length;
+    h+=`<div class="grid2"><div class="tile">${t("open")}<b>${o}/${lg.length}</b></div><div class="tile">${t("close")}<b>${c}/${lg.length}</b></div></div><div class="list" style="margin-top:8px">`+
+      lg.slice(-10).reverse().map(x=>`<div class="it"><div class="sp">${esc(x.date)}</div><div class="r cd">${t("open")} ${x.open_right==="1"?"✅":"❌"} ${t("close")} ${x.close_right==="1"?"✅":"❌"}<br>${num(x.pred_close)} → ${num(x.actual_close)}</div></div>`).join("")+`</div>`;
+  }else h+=`<div class="mut">${t("scoreNone")}</div>`;
+  el.innerHTML=h+`</div>`;
+}
+
+/* ---------- sheet & settings ---------- */
+function sheet(html){document.getElementById("sheetIn").innerHTML=`<div class="grab"></div>`+html;document.getElementById("sheet").classList.add("on")}
+function closeSheet(){document.getElementById("sheet").classList.remove("on")}
+function openSettings(){
+  sheet(`<div class="mid">${t("settings")}</div>
+   <div class="opt"><span>${t("lang")}</span><div class="seg" style="margin:0;width:170px"><button class="${S.lang==="en"?"on":""}" onclick="setL('en')">EN</button><button class="${S.lang==="zh"?"on":""}" onclick="setL('zh')">繁中</button></div></div>
+   <div class="opt" style="display:block"><div>${t("colors")}</div><div class="seg" style="margin:8px 0 0"><button class="${S.col==="tw"?"on":""}" onclick="setC('tw')">${t("colTW")}</button><button class="${S.col==="us"?"on":""}" onclick="setC('us')">${t("colUS")}</button></div></div>
+   <div class="opt"><span>${S.lang==="zh"?"版本":"Version"}</span><b>v${VERSION}</b></div>
+   <div class="mut" style="margin-top:14px">${t("about")}</div>`);
+}
+function setL(l){S.lang=l;put("lang",l);render();openSettings()}
+function setC(c){S.col=c;put("col",c);render();openSettings()}
+window.onBack=function(){if(document.getElementById("sheet").classList.contains("on")){closeSheet();return true}if(S.tab!=="today"){go("today");return true}return false};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&D.fetched&&Date.now()-new Date(D.fetched)>10*60*1000)load()});
+const hp=new URLSearchParams(location.hash.slice(1));if(hp.get("tab"))S.tab=hp.get("tab");if(hp.get("lang"))S.lang=hp.get("lang");
+const c0=get("cache");if(c0){try{D=JSON.parse(c0);D.offline=true}catch(e){}}
+render();if(get("k")&&get("rsa"))load();else showLock();
+</script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+{
+ "_note": "Hot-topic groups that cut across official industries. The first 17 are the AI supply chain. Edit anytime. 題材分類（前 17 個是 AI 供應鏈），可隨時修改。",
+ "themes": [
+  {
+   "id": "ai_server",
+   "zh": "AI伺服器組裝",
+   "en": "AI server assembly",
+   "codes": [
+    "2382",
+    "3231",
+    "6669",
+    "2317",
+    "2356",
+    "2376",
+    "2377",
+    "3706",
+    "2324"
+   ],
+   "keywords": [
+    "AI伺服器",
+    "AI 伺服器",
+    "GB300",
+    "GB200",
+    "Rubin",
+    "AI server"
+   ]
+  },
+  {
+   "id": "server_chassis",
+   "zh": "伺服器機殼／滑軌",
+   "en": "Server chassis & rails",
+   "codes": [
+    "8210",
+    "2059",
+    "3013",
+    "3693",
+    "6117"
+   ],
+   "keywords": [
+    "機殼",
+    "滑軌",
+    "chassis"
+   ]
+  },
+  {
+   "id": "cooling",
+   "zh": "散熱",
+   "en": "Cooling",
+   "codes": [
+    "3017",
+    "3324",
+    "3653",
+    "2421",
+    "6230",
+    "8996",
+    "3338"
+   ],
+   "keywords": [
+    "散熱",
+    "液冷",
+    "水冷",
+    "liquid cooling"
+   ]
+  },
+  {
+   "id": "power_supply",
+   "zh": "電源",
+   "en": "Power supplies",
+   "codes": [
+    "2308",
+    "2301",
+    "6409",
+    "3015",
+    "6412"
+   ],
+   "keywords": [
+    "電源",
+    "BBU",
+    "power supply"
+   ]
+  },
+  {
+   "id": "foundry",
+   "zh": "晶圓代工",
+   "en": "Chip foundry",
+   "codes": [
+    "2330",
+    "2303",
+    "5347",
+    "6770"
+   ],
+   "keywords": [
+    "晶圓代工",
+    "台積電",
+    "聯電",
+    "foundry",
+    "TSMC"
+   ]
+  },
+  {
+   "id": "ic_design",
+   "zh": "IC設計／ASIC",
+   "en": "IC design / ASIC",
+   "codes": [
+    "2454",
+    "3443",
+    "3661",
+    "3035",
+    "6643",
+    "5274",
+    "2379",
+    "3034",
+    "6533"
+   ],
+   "keywords": [
+    "ASIC",
+    "IC設計",
+    "矽智財",
+    "聯發科"
+   ]
+  },
+  {
+   "id": "adv_packaging",
+   "zh": "先進封裝 CoWoS",
+   "en": "Advanced packaging (CoWoS)",
+   "codes": [
+    "3711",
+    "6239",
+    "8150"
+   ],
+   "keywords": [
+    "CoWoS",
+    "先進封裝",
+    "封測",
+    "advanced packaging"
+   ]
+  },
+  {
+   "id": "equipment",
+   "zh": "半導體設備",
+   "en": "Chip-making equipment",
+   "codes": [
+    "3131",
+    "6187",
+    "3583",
+    "6640",
+    "2467",
+    "1560",
+    "3413",
+    "3680"
+   ],
+   "keywords": [
+    "半導體設備",
+    "設備股",
+    "equipment",
+    "濕製程"
+   ]
+  },
+  {
+   "id": "fab_facility",
+   "zh": "廠務工程／無塵室",
+   "en": "Fab building & cleanrooms",
+   "codes": [
+    "2404",
+    "6196",
+    "6139",
+    "5536"
+   ],
+   "keywords": [
+    "廠務",
+    "無塵室",
+    "cleanroom"
+   ]
+  },
+  {
+   "id": "testing",
+   "zh": "測試",
+   "en": "Chip testing",
+   "codes": [
+    "2449",
+    "6515",
+    "6223",
+    "6510",
+    "3587",
+    "3289"
+   ],
+   "keywords": [
+    "測試",
+    "探針卡",
+    "test socket",
+    "京元電"
+   ]
+  },
+  {
+   "id": "dram",
+   "zh": "DRAM 記憶體",
+   "en": "DRAM (RAM)",
+   "codes": [
+    "2408",
+    "2344",
+    "3006",
+    "5351"
+   ],
+   "keywords": [
+    "DRAM",
+    "記憶體",
+    "HBM",
+    "南亞科",
+    "華邦電"
+   ]
+  },
+  {
+   "id": "memory_module",
+   "zh": "記憶體模組",
+   "en": "Memory modules",
+   "codes": [
+    "3260",
+    "4967",
+    "2451",
+    "8271"
+   ],
+   "keywords": [
+    "記憶體模組",
+    "威剛",
+    "十銓"
+   ]
+  },
+  {
+   "id": "ssd_nand",
+   "zh": "SSD／NAND 快閃",
+   "en": "SSD / NAND flash",
+   "codes": [
+    "8299",
+    "2337",
+    "5289"
+   ],
+   "keywords": [
+    "SSD",
+    "NAND",
+    "快閃記憶體",
+    "群聯",
+    "flash"
+   ]
+  },
+  {
+   "id": "pcb",
+   "zh": "PCB／載板",
+   "en": "PCB / substrates",
+   "codes": [
+    "3037",
+    "8046",
+    "3189",
+    "2383",
+    "6274",
+    "2368",
+    "6213",
+    "3044",
+    "4958"
+   ],
+   "keywords": [
+    "PCB",
+    "載板",
+    "銅箔基板",
+    "CCL",
+    "substrate"
+   ]
+  },
+  {
+   "id": "silicon_photonics",
+   "zh": "矽光子／CPO",
+   "en": "Silicon photonics / CPO",
+   "codes": [
+    "3363",
+    "4979",
+    "3081",
+    "3450",
+    "6442",
+    "4977",
+    "2455"
+   ],
+   "keywords": [
+    "矽光子",
+    "CPO",
+    "光通訊",
+    "silicon photonics"
+   ]
+  },
+  {
+   "id": "networking",
+   "zh": "網通／交換器",
+   "en": "Networking / switches",
+   "codes": [
+    "2345",
+    "3596",
+    "5388",
+    "6285"
+   ],
+   "keywords": [
+    "網通",
+    "交換器",
+    "switch",
+    "800G"
+   ]
+  },
+  {
+   "id": "connectors",
+   "zh": "連接器／線材",
+   "en": "Connectors & cables",
+   "codes": [
+    "3665",
+    "3533",
+    "2392",
+    "3023"
+   ],
+   "keywords": [
+    "連接器",
+    "高速傳輸",
+    "線材",
+    "connector"
+   ]
+  },
+  {
+   "id": "power_grid",
+   "zh": "重電",
+   "en": "Power grid equipment",
+   "codes": [
+    "1503",
+    "1504",
+    "1513",
+    "1514",
+    "1519",
+    "1605"
+   ],
+   "keywords": [
+    "重電",
+    "電網",
+    "變壓器",
+    "台電",
+    "power grid"
+   ]
+  },
+  {
+   "id": "robotics",
+   "zh": "機器人",
+   "en": "Robotics",
+   "codes": [
+    "2049",
+    "1590",
+    "4583",
+    "2359",
+    "8374"
+   ],
+   "keywords": [
+    "機器人",
+    "人形機器人",
+    "robot",
+    "humanoid"
+   ]
+  },
+  {
+   "id": "defense_drone",
+   "zh": "軍工／無人機",
+   "en": "Defense / drones",
+   "codes": [
+    "2634",
+    "8033",
+    "3005",
+    "2208"
+   ],
+   "keywords": [
+    "無人機",
+    "軍工",
+    "國防",
+    "drone",
+    "defense"
+   ]
+  }
+ ]
+}

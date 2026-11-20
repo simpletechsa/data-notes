@@ -1,0 +1,20 @@
+﻿run_time_tpe,mode,seconds,result,errors
+2026-11-18 11:18:11,us_close,69,"prices +0 new rows, snapshots +29 ; news +580 new headlines ; ptt +52 new posts ; daily signals 22 rows",
+2026-11-19 16:17:11,tw_close,91,"prices +32 new rows, snapshots +29 ; money-flow +6, per-stock +0, margin +0 ; revenue +0 ; news +575 new headlines ; ptt +0 new posts ; daily signals 32 rows",ptt: HTTP Error 500: Internal Server Error
+2026-11-19 17:17:21,us_close,523,"catch-up 2026-11-12..2026-11-18 (5 weekdays) ; money-flow +12, per-stock +12, margin +6 ; open-snapshots +70 ; 2026-11-12: news +598 new headlines ; 2026-11-13: news +568 new headlines ; 2026-11-15: news +573 new headlines ; 2026-11-16: news +539 new headlines ; 2026-11-17: news +330 new headlines ; 2026-11-18: news +96 new headlines ; 2026-11-14: news +535 new headlines ; ptt +0 new posts ; prices +2 new rows, snapshots +29 ; news +99 new headlines ; ptt +0 new posts ; daily signals 82 rows",MARGN 20261117: HTTP Error 307: Temporary Redirect | ptt: HTTP Error 500: Internal Server Error | ptt: HTTP Error 500: Internal Server Error
+2026-11-20 09:31:06,asia_open,63,"catch-up: nothing missed ; prices +21 new rows, snapshots +29 ; news +495 new headlines ; ptt +14 new posts ; daily signals 93 rows",
+2026-11-20 10:08:00,asia_open,56,"catch-up: nothing missed ; prices +0 new rows, snapshots +29 ; news +599 new headlines ; ptt +42 new posts ; daily signals 94 rows",
+2026-11-20 10:36:57,us_close,51,"catch-up: nothing missed ; prices +0 new rows, snapshots +29 ; news +593 new headlines ; ptt +48 new posts ; daily signals 94 rows",
+2026-11-20 10:51:41,asia_open,79,"catch-up: nothing missed ; prices +0 new rows, snapshots +29 ; news +157 new headlines ; ptt +38 new posts ; forecast.py FAILED ; daily signals 94 rows","forecast.py failed: e ""/home/claude/tw-stock-lab/collector/forecast.py"", line 173, in main
+    txt = vault.read(path)
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 48, in read
+    return dec(f.read()).decode(""utf-8"")
+           ~~~^^^^^^^^^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 34, in dec
+    return AESGCM(key()).decrypt(blob[2:14], blob[14:], None)
+                  ~~~^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 23, in key
+    raise NoKey(""DATA_KEY is not set - private files are not written"")
+vault.NoKey: DATA_KEY is not set - private files are not written
+"
+2026-11-20 11:19:51,tw_close,184,"catch-up: nothing missed ; prices +0 new rows, snapshots +29 ; money-flow +6, per-stock +6, margin +6, all-stock flow +1091 ; revenue +0 ; news +593 new headlines ; ptt +47 new posts ; market prices +1943 rows (1986 stocks) ; revenue(all) +0 ; analysis + report done ; daily signals 94 rows",

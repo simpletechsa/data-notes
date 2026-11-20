@@ -1,0 +1,14 @@
+# full headline / post text stays on the machine that collected it (not uploaded)
+data/news/
+data/ptt/
+__pycache__/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+_apptest.html
+# private outputs: only the scrambled .enc versions are uploaded
+data/report/*.json
+data/report/*.html
+data/paper_trades.csv
+data/forecast_log.csv

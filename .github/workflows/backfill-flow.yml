@@ -1,0 +1,30 @@
+# One-time: download 2 years of 法人 (institutional) history for backtesting. Run manually.
+# 一次性：下載 2 年法人歷史供回測。手動執行。
+name: Backfill
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backfill 補資料
+        run: python3 collector/flow_history.py 2024-11-01 2099-12-31
+      - name: Save 存檔
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/market/flow_history.csv.gz
+          git diff --cached --quiet && exit 0
+          git commit -m "data: institutional history backfill"
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && break; sleep 5; done

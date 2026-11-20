@@ -1,0 +1,11 @@
+{
+  "_note": "Simple good/bad word lists used to score headlines from -1 (bad) to +1 (good). Rough on purpose; backtesting will show if it helps. 好/壞詞庫，標題分數 -1 到 +1。",
+  "positive": [
+    "漲", "大漲", "飆", "噴", "創高", "新高", "強勢", "看好", "利多", "上修", "成長", "暴增", "受惠", "突破", "反彈", "買超", "加碼", "降息", "寬鬆", "停火", "和談", "豁免", "延後關稅", "訂單", "旺", "樂觀", "回升", "缺貨", "漲價", "多頭", "歐印", "漲停",
+    "surge", "soar", "rally", "jump", "gain", "record high", "beat", "upgrade", "bullish", "boost", "rate cut", "ceasefire", "deal", "exemption", "strong demand", "rebound"
+  ],
+  "negative": [
+    "跌", "大跌", "重挫", "崩", "暴跌", "下修", "利空", "衰退", "裁員", "賣超", "減碼", "升息", "緊縮", "戰爭", "開戰", "攻擊", "飛彈", "制裁", "關稅", "禁令", "限制", "管制", "砍單", "疲弱", "悲觀", "恐慌", "下跌", "空頭", "跌停", "倒", "泡沫", "警告", "衝突",
+    "plunge", "slump", "crash", "fall", "drop", "tumble", "downgrade", "bearish", "rate hike", "tariff", "ban", "sanction", "war", "attack", "recession", "layoff", "sell-off", "selloff", "fear", "bubble", "warning"
+  ]
+}
