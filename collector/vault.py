@@ -44,6 +44,14 @@ def write(path: str, text: str):
         os.remove(path)
 
 
+def save_or_print(path: str, text: str):
+    """With the key: save scrambled. Without it (phone-message task): just print, save nothing."""
+    if os.environ.get("DATA_KEY", "").strip():
+        write(path, text)
+    else:
+        print("RESULT_JSON " + text)
+
+
 def read(path: str, default=None):
     if os.path.exists(path + ".enc"):
         with open(path + ".enc", "rb") as f:

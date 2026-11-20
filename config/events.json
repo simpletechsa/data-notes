@@ -1,0 +1,31 @@
+{
+  "_note": "Known market events. time_tpe = Taipei time. 'approx' = date not confirmed yet. Sources: Federal Reserve (FOMC, revised 2027 schedule of Nov 12 2026), BLS (CPI), MSCI, Taiwan Central Election Commission. Futures settlement days and TSMC monthly revenue are generated automatically. 已知事件（台北時間）。",
+  "events": [
+    {"date": "2026-11-28", "time_tpe": "all day", "en": "Taiwan local elections", "zh": "台灣九合一地方選舉", "impact": "next_session", "weight": 2},
+    {"date": "2026-11-30", "time_tpe": "13:30", "en": "MSCI rebalance trades at today's close (Nov review)", "zh": "MSCI 季度調整今日收盤生效", "impact": "same_session", "weight": 2},
+    {"date": "2026-12-10", "time_tpe": "21:30", "en": "US inflation (CPI) for November", "zh": "美國 11 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2026-12-10", "time_tpe": "03:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-01-13", "time_tpe": "21:30", "en": "US inflation (CPI) for December", "zh": "美國 12 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-01-28", "time_tpe": "03:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-01-14", "time_tpe": "14:00", "en": "TSMC quarterly earnings (approx.)", "zh": "台積電法說會（預估日期）", "impact": "next_session", "weight": 3, "approx": true},
+    {"date": "2027-02-11", "time_tpe": "21:30", "en": "US inflation (CPI) for January", "zh": "美國 1 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-02-25", "time_tpe": "05:20", "en": "Nvidia earnings (approx., date not announced)", "zh": "輝達財報（預估，尚未公布日期）", "impact": "same_session", "weight": 3, "approx": true},
+    {"date": "2027-03-01", "time_tpe": "13:30", "en": "MSCI rebalance (Feb review, approx.)", "zh": "MSCI 季度調整（預估）", "impact": "same_session", "weight": 2, "approx": true},
+    {"date": "2027-03-10", "time_tpe": "21:30", "en": "US inflation (CPI) for February", "zh": "美國 2 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-03-18", "time_tpe": "02:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-04-13", "time_tpe": "20:30", "en": "US inflation (CPI) for March", "zh": "美國 3 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-04-29", "time_tpe": "02:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-05-12", "time_tpe": "20:30", "en": "US inflation (CPI) for April", "zh": "美國 4 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-06-10", "time_tpe": "20:30", "en": "US inflation (CPI) for May", "zh": "美國 5 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-06-10", "time_tpe": "02:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-07-14", "time_tpe": "20:30", "en": "US inflation (CPI) for June", "zh": "美國 6 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-07-29", "time_tpe": "02:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-08-11", "time_tpe": "20:30", "en": "US inflation (CPI) for July", "zh": "美國 7 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-09-14", "time_tpe": "20:30", "en": "US inflation (CPI) for August", "zh": "美國 8 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-09-16", "time_tpe": "02:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-10-14", "time_tpe": "20:30", "en": "US inflation (CPI) for September", "zh": "美國 9 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-11-10", "time_tpe": "21:30", "en": "US inflation (CPI) for October", "zh": "美國 10 月 CPI", "impact": "next_session", "weight": 2},
+    {"date": "2027-11-18", "time_tpe": "03:00", "en": "Fed rate decision (FOMC)", "zh": "聯準會利率決策", "impact": "same_session", "weight": 3},
+    {"date": "2027-12-10", "time_tpe": "21:30", "en": "US inflation (CPI) for November", "zh": "美國 11 月 CPI", "impact": "next_session", "weight": 2}
+  ]
+}

@@ -385,13 +385,33 @@ def collect_futures(log):
     fix = [f for f in fix if f["date"] not in have_tw]
     if fix:
         upsert_csv("prices.csv", ["date", "symbol", "name_zh", "name_en", "group", "open", "high", "low", "close", "volume"], fix, ["date", "symbol"])
-    return f"futures +{a}, gap days +{b}, TAIEX fixes {len(fix)}"
+    # foreign futures bets (外資台指期淨未平倉) and put/call ratio (選擇權 P/C) - TAIFEX only accepts dates that exist
+    c = d2 = 0
+    for end in (today, today - timedelta(days=1), today - timedelta(days=2), today - timedelta(days=3)):
+        q = {"queryStartDate": (end - timedelta(days=20)).strftime("%Y/%m/%d"), "queryEndDate": end.strftime("%Y/%m/%d")}
+        try:
+            t = urllib.request.urlopen(urllib.request.Request("https://www.taifex.com.tw/cht/3/futContractsDateDown",
+                                       data=urllib.parse.urlencode({**q, "commodityId": "TXF"}).encode(), headers={"User-Agent": UA}),
+                                       timeout=60).read().decode("big5", errors="replace")
+            if "DateTime error" in t:
+                continue
+            ff = [{"date": r[0].replace("/", "-"), "foreign_net_oi": r[13], "foreign_net_trade": r[7]}
+                  for r in csv.reader(_io.StringIO(t)) if len(r) > 13 and r[2].strip() == "外資及陸資"]
+            c = upsert_csv("futures/foreign_futures.csv", ["date", "foreign_net_oi", "foreign_net_trade"], ff, ["date"])
+            t = urllib.request.urlopen(urllib.request.Request("https://www.taifex.com.tw/cht/3/pcRatioDown",
+                                       data=urllib.parse.urlencode(q).encode(), headers={"User-Agent": UA}), timeout=60).read().decode("big5", errors="replace")
+            pc = [{"date": r[0].replace("/", "-"), "pc_vol": r[3], "pc_oi": r[6]} for r in csv.reader(_io.StringIO(t)) if len(r) > 6 and r[0][:2] == "20"]
+            d2 = upsert_csv("futures/put_call.csv", ["date", "pc_vol", "pc_oi"], pc, ["date"])
+            break
+        except Exception as e:
+            log.append(f"foreign futures/PC: {e}")
+    return f"futures +{a}, gap days +{b}, TAIEX fixes {len(fix)}, foreign-futures +{c}, put/call +{d2}"
 
 
 def run_script(name, log, args=()):
     import subprocess
     r = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), name), *args],
-                       capture_output=True, text=True, timeout=900)
+                       capture_output=True, text=True, timeout=2700)
     if r.returncode != 0:
         log.append(f"{name} failed: " + r.stderr[-600:])
         return f"{name} FAILED"
@@ -641,15 +661,17 @@ def build_daily_signals():
 # ---------------------------------------------------------------- main
 PLAN = {
     # 08:40 Taipei - Japan & Korea just opened, before Taiwan opens
-    "asia_open": ["prices", "futures", "news", "ptt", "forecast", "alerts_pre"],
+    "asia_open": ["prices", "futures", "news", "ptt", "fear", "forecast", "events", "bottom", "alerts_pre"],
     # 09:20 / 10:00 / 12:00 / 13:15 Taipei - live alert scans of all stocks (with the news at that moment)
-    "alerts": ["news", "alerts_live"],
+    "alerts": ["news", "fear", "alerts_live"],
+    "fear_backfill": ["fear_backfill"],
     # 16:40 Taipei - Taiwan closed, money-flow + revenue published
-    "tw_close": ["prices", "futures", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze", "score", "alerts_followup"],
+    "tw_close": ["prices", "futures", "twse", "revenue", "news", "ptt", "fear", "market", "revenue_all", "analyze", "score",
+                 "alerts_followup", "bottom", "events", "fear_test"],
     # 22:50 Taipei - US just opened; TWSE margin data is out by now
-    "us_open": ["prices", "twse", "news", "ptt"],
+    "us_open": ["prices", "twse", "news", "ptt", "fear"],
     # 05:40 Taipei - US closed: final prices + why it moved
-    "us_close": ["prices", "news", "ptt"],
+    "us_close": ["prices", "news", "ptt", "fear"],
     "all": ["prices", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze"],
 }
 
@@ -697,6 +719,17 @@ def main():
                 done.append(run_script("alerts.py", log, ["live", a.tag or now_tpe().strftime("%H%M")]))
             elif step == "alerts_followup":
                 done.append(run_script("alerts.py", log, ["followup"]))
+            elif step == "fear":
+                done.append(run_script("fear.py", log, ["now"]))
+            elif step == "fear_test":
+                done.append(run_script("fear.py", log, ["test"]))
+            elif step == "fear_backfill":
+                done.append(run_script("fear.py", log, ["backfill", "90"]))
+                done.append(run_script("fear.py", log, ["test"]))
+            elif step == "events":
+                done.append(run_script("calendar_events.py", log))
+            elif step == "bottom":
+                done.append(run_script("bottom.py", log))
             elif step == "score":
                 done.append(run_script("forecast.py", log, ["--score"]))
         except Exception as e:

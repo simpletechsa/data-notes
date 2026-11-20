@@ -106,6 +106,11 @@ const T = {
   ppNone:"No closed trades yet — results appear as trades finish (up to 4 weeks).",
   st:{open:"Holding",pending:"Buy next open",win:"Target hit",loss:"Stopped out",timeout:"Time exit"},
   acc:"Forecast accuracy",settings:"Settings",lang:"Language",colors:"Up/down colors",colTW:"Taiwan (red = up)",colUS:"US (green = up)",
+  evT:"Act today — events coming",evW:"Next 7 trading days",evNone:"No known events need action today.",evHits:"hits",evApprox:"date not confirmed",
+  fearT:"Fear meter",fearLearn:"Learning what's normal — levels appear after 10 days of data.",fearLv:{calm:"Calm",elevated:"Elevated",high:"High",extreme:"EXTREME",learning:"Learning"},fearStories:"stories today",fearNormal:"normal",
+  botT:"Bottom watch (is the drop ending?)",botScore:"Score",botNot:"Not in a big drop right now.",botIn:"TAIEX is {d}% below its 60-day high.",
+  botTrack:"History (5y): score 2+ → up 20 days later {u}% of the time (avg {a}). Score 0 → {u0}% (coin flip), fell a further {f0} first.",
+  botFS:"Foreign futures shorts",botPC:"Put/call ratio",botExtreme:"1-year extreme",botLow:"low (bearish lean)",
   live:"Live market",spot:"TAIEX",futures:"Futures",gapL:"Futures vs index",prem:"premium (above index)",disc:"discount (below index)",night:"night",liveNA:"Live prices show in the phone app.",
   panic:"⚠ Panic / big-move day: overnight moves were extreme. The real move is often much bigger than the forecast — the range has been widened.",
   nightF:"Night futures",usesF:"includes night futures",
@@ -138,6 +143,11 @@ const T = {
   ppNone:"還沒有結束的交易 — 交易結束後（最多 4 週）就會顯示。",
   st:{open:"持有中",pending:"下個開盤買",win:"達標",loss:"停損",timeout:"到期賣出"},
   acc:"預測準確度",settings:"設定",lang:"語言",colors:"漲跌顏色",colTW:"台灣（紅漲綠跌）",colUS:"美國（綠漲紅跌）",
+  evT:"今天要注意 — 即將發生的事件",evW:"未來 7 個交易日",evNone:"今天沒有需要提前因應的已知事件。",evHits:"影響",evApprox:"日期未確定",
+  fearT:"恐慌指標",fearLearn:"正在學習正常水準 — 累積 10 天資料後顯示等級。",fearLv:{calm:"平靜",elevated:"升高",high:"偏高",extreme:"極高",learning:"學習中"},fearStories:"則新聞事件",fearNormal:"平常",
+  botT:"止跌觀察（跌勢是否結束？）",botScore:"分數",botNot:"目前不在大跌之中。",botIn:"加權指數距 60 日高點 {d}%。",
+  botTrack:"歷史（5年）：分數 2 以上 → 20 天後上漲機率 {u}%（平均 {a}）。分數 0 → {u0}%（擲硬幣），且平均先再跌 {f0}。",
+  botFS:"外資台指期淨空單",botPC:"選擇權 P/C 比",botExtreme:"一年來最極端",botLow:"偏低（偏空）",
   live:"即時行情",spot:"加權指數",futures:"台指期",gapL:"期現貨價差",prem:"正價差（高於現貨）",disc:"逆價差（低於現貨）",night:"夜盤",liveNA:"即時報價在手機 App 裡顯示。",
   panic:"⚠ 恐慌／大波動日：隔夜變動非常大，實際幅度常比預測大很多，已加寬預估區間。",
   nightF:"台指期夜盤",usesF:"已納入夜盤",
@@ -216,7 +226,8 @@ async function load(force){
     const [rep,fc,log,note,al,ast]=await Promise.all([fetchJ("report/latest.json"),fetchJ("report/forecast.json").catch(()=>null),
       fetchJ("forecast_log.csv",true).then(parseCSV).catch(()=>[]),fetchJ("report/morning_note.json").catch(()=>null),
       fetchJ("report/alerts_latest.json").catch(()=>null),fetchJ("report/alert_stats.json").catch(()=>null)]);
-    D={report:rep,fc:fc,log:log,note:note,al:al,ast:ast,fetched:new Date().toISOString(),offline:false};
+    const [ev,fear,bot]=await Promise.all([fetchJ("report/events.json").catch(()=>null),fetchJ("report/fear.json").catch(()=>null),fetchJ("report/bottom.json").catch(()=>null)]);
+    D={report:rep,fc:fc,log:log,note:note,al:al,ast:ast,ev:ev,fear:fear,bot:bot,fetched:new Date().toISOString(),offline:false};
     put("cache",JSON.stringify(D));
   }catch(e){
     const c=get("cache");if(c){D=JSON.parse(c);D.offline=true}else{D.report=null}
@@ -261,6 +272,33 @@ function liveCard(){
    <div class="tile">${t("futures")}${LIVE.night?` (${t("night")})`:""}<b style="font-size:20px">${fp?num(fp):"–"}</b>${f?pct((+f.CDiffRate||0)/100,2):""} <span class="cd">${f?(+f.CDiff>0?"+":"")+num(+f.CDiff):""}</span></div></div>
    ${g!==null&&!LIVE.night?`<div class="mut" style="margin-top:8px">${t("gapL")}: <b class="${g>=0?"up":"down"}">${g>0?"+":""}${num(Math.round(g))}</b> (${g>=0?t("prem"):t("disc")})</div>`:""}</div>`;
 }
+function eventsCard(){
+  const e=D.ev;if(!e)return "";const nm2=x=>esc(S.lang==="zh"?x.zh:x.en)+(x.approx?` <span class="cd">(${t("evApprox")})</span>`:"");
+  let h=`<div class="card" style="border-color:${e.act_today&&e.act_today.length?"#b45309":"var(--line)"}"><div class="mid">📅 ${t("evT")}</div>`;
+  h+=(e.act_today&&e.act_today.length)?`<ul>${e.act_today.map(x=>`<li><b class="warn">${nm2(x)}</b> <span class="cd">· ${esc(x.date)} ${esc(x.time_tpe)} → ${t("evHits")} ${esc(x.hits_session)}</span></li>`).join("")}</ul>`:`<div class="mut" style="margin-top:4px">${t("evNone")}</div>`;
+  if(e.week&&e.week.length)h+=`<div class="mut" style="margin-top:10px">${t("evW")}</div><ul>${e.week.map(x=>`<li>${esc(x.hits_session.slice(5))} · ${nm2(x)}</li>`).join("")}</ul>`;
+  return h+`</div>`;
+}
+function fearCard(){
+  const f=D.fear;if(!f||!f.meter)return "";const col={calm:"var(--down)",elevated:"var(--warm)",high:"var(--hot)",extreme:"var(--up)",learning:"var(--mut)"};
+  let h=`<div class="h2">${t("fearT")}</div><div class="card list">`;
+  h+=Object.entries(f.meter).map(([k,m])=>`<div class="it" onclick='sheet(${JSON.stringify(`<div class="mid">${esc(S.lang==="zh"?m.zh:m.en)}</div><ul>${(m.top||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`)})'>
+    <div class="sp"><div class="nm" style="font-size:14px">${esc(S.lang==="zh"?m.zh:m.en)}</div><div class="cd">${m.stories} ${t("fearStories")}${m.level!=="learning"?` · ${t("fearNormal")} ${m.normal}`:""}</div></div>
+    <div class="r"><b style="color:${col[m.level]}">${t("fearLv")[m.level]||m.level}</b>${m.level!=="learning"?`<div class="cd">${m.ratio}x</div>`:""}</div></div>`).join("");
+  if(f.days_of_history<10)h+=`<div class="mut" style="padding-top:8px">${t("fearLearn")}</div>`;
+  return h+`</div>`;
+}
+function bottomCard(){
+  const b=D.bot;if(!b)return "";const tr=b.track;
+  let h=`<div class="h2">${t("botT")}</div><div class="card"><div class="row"><div class="sp mut">${b.in_drop?t("botIn").replace("{d}",Math.abs(b.drop_from_high*100).toFixed(1)):t("botNot")}</div>
+    <div class="pct" style="color:${b.score>=2?"var(--up)":b.score==1?"var(--warm)":"var(--mut)"}">${b.score}/4<small>${t("botScore")}</small></div></div><div class="list" style="margin-top:6px">`;
+  h+=b.signs.map(x=>`<div class="it"><div class="sp" style="font-size:14px">${esc(S.lang==="zh"?x.zh:x.en)}</div><div class="r">${x.on?"✅":"❌"}</div></div>`).join("");
+  const ex=b.extras||{};
+  if(ex.foreign_shorts)h+=`<div class="it"><div class="sp" style="font-size:14px">${t("botFS")}<div class="cd">${num(ex.foreign_shorts.net_oi)} · ${esc(ex.foreign_shorts.date)}</div></div><div class="r cd">${ex.foreign_shorts.extreme?"⚠ "+t("botExtreme"):"–"}</div></div>`;
+  if(ex.put_call)h+=`<div class="it"><div class="sp" style="font-size:14px">${t("botPC")}<div class="cd">${ex.put_call.pc_oi}% · ${esc(ex.put_call.date)}</div></div><div class="r cd">${ex.put_call.low?"⚠ "+t("botLow"):"–"}</div></div>`;
+  h+=`</div><div class="mut" style="margin-top:8px">${t("botTrack").replace("{u}",Math.round(tr.score2.up*100)).replace("{a}","+"+(tr.score2.avg20*100).toFixed(1)+"%").replace("{u0}",Math.round(tr.score0.up*100)).replace("{f0}",(tr.score0.further*100).toFixed(1)+"%")}</div></div>`;
+  return h;
+}
 function moneyCard(){
   const m=D.report&&D.report.money;if(!m||!m.foreign)return "";
   const line=(lab,x)=>x?`<div class="it"><div class="sp"><div class="nm" style="font-size:14px">${lab}</div><div class="cd">${Math.abs(x.streak)} ${x.streak>=0?t("streakBuy"):t("streakSell")} · ${t("last5")} ${(x.sum5>0?"+":"")+num(x.sum5)}億</div></div>
@@ -276,7 +314,7 @@ function moneyCard(){
 /* ---------- TODAY ---------- */
 function rToday(){
   const f=D.fc, el=document.getElementById("tab-today"), today=new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Taipei"});
-  let h=liveCard();
+  let h=liveCard()+eventsCard();
   if(!f||f.date!==today){h+=`<div class="card"><div class="mid">${t("fc")}</div><div class="empty">${t("noFc")}</div></div>`}
   if(f){
     const p=f.pred,L=f.levels||{},pc=f.prev_close;
@@ -303,7 +341,7 @@ function rToday(){
     }else h+=`<div class="mut">${t("scoreNone")}</div>`;
     h+=`</div>`;
   }
-  h+=moneyCard();
+  h+=fearCard()+bottomCard()+moneyCard();
   const hot=D.report.heat.filter(x=>x.level==="hot");
   h+=`<div class="h2">${t("mood")}</div><div class="card"><div class="mut">${t("hotNow")}</div><div style="margin-top:6px">${hot.map(x=>`<span class="chip lv-hot">${esc(nm(x))} ${x.trend?t("tr")[x.trend]:pct(x.r5)}</span>`).join("")}</div>
      <div class="mut" style="margin-top:10px">${t("aiAvg")}: <b>${Math.round(D.report.focus?.avg_heat||0)}</b>/100</div></div>`;
