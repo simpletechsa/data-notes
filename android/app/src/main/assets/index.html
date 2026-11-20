@@ -61,6 +61,7 @@ ul{margin:6px 0 0;padding-left:18px}li{margin:3px 0;font-size:14px}
   <section class="tabpage" id="tab-ai"></section>
   <section class="tabpage" id="tab-sectors"></section>
   <section class="tabpage" id="tab-picks"></section>
+  <section class="tabpage" id="tab-alerts"></section>
   <section class="tabpage" id="tab-paper"></section>
 </main>
 <nav id="nav"></nav>
@@ -82,6 +83,7 @@ const TABS = [
   ["ai", '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/><rect x="9.5" y="9.5" width="5" height="5"/></svg>'],
   ["sectors", '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg>'],
   ["picks", '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'],
+  ["alerts", '<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>'],
   ["paper", '<svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>'],
 ];
 const T = {
@@ -104,6 +106,11 @@ const T = {
   ppNone:"No closed trades yet — results appear as trades finish (up to 4 weeks).",
   st:{open:"Holding",pending:"Buy next open",win:"Target hit",loss:"Stopped out",timeout:"Time exit"},
   acc:"Forecast accuracy",settings:"Settings",lang:"Language",colors:"Up/down colors",colTW:"Taiwan (red = up)",colUS:"US (green = up)",
+  alerts:"Alerts",alToday:"Alerts today",alTop:"Top",alAI:"AI",alWatch:"Watch list",alStats:"Which work",alNone:"No alerts yet today. Checks run 08:40, 09:20, 10:00, 12:00, 13:15.",
+  alNew:"new",alVol:"vol",alNews:"news",alHist:"History of this alert",alAvg10:"avg after 10 days",alUp5:"hit +5%",alDn5:"hit −5%",alAny:"any stock",
+  alHeadlines:"News at that moment",alSector:"sector news (24h)",alLevel:"Trigger level",alTime:"Time",alWatchNone:"Nothing near an alert point this morning.",
+  alStatsNote:"2 years of all Taiwan stocks. 'Any stock' = average for comparison.",alLive:"Our alerts so far (after 5 days)",alWith:"with news",alWithout:"no news",alWait:"Results appear after alerts are 5+ trading days old.",
+  alType:"Alert",alN:"times",premarket:"Pre-market",bull:"Bullish",bear:"Bearish",
   about:"Analysis only — not investment advice.",dataFrom:"Data",lockT:"Enter password",lockS:"Only needed once on this phone.",lockB:"Unlock",lockE:"Wrong password",lockW:"Unlocking…",now:"Now",entry:"Entry",heldD:"days held",group:"Group",price:"Price"},
  zh:{app:"stsa 市場研究室",today:"今日",ai:"AI",sectors:"產業",picks:"選股",paper:"模擬",
   fc:"盤前預測",open:"開盤",close:"收盤",range:"今日區間",high:"最高",low:"最低",prev:"昨收",
@@ -124,9 +131,14 @@ const T = {
   ppNone:"還沒有結束的交易 — 交易結束後（最多 4 週）就會顯示。",
   st:{open:"持有中",pending:"下個開盤買",win:"達標",loss:"停損",timeout:"到期賣出"},
   acc:"預測準確度",settings:"設定",lang:"語言",colors:"漲跌顏色",colTW:"台灣（紅漲綠跌）",colUS:"美國（綠漲紅跌）",
+  alerts:"警示",alToday:"今日警示",alTop:"重點",alAI:"AI",alWatch:"觀察名單",alStats:"哪些有效",alNone:"今天還沒有警示。檢查時間 08:40、09:20、10:00、12:00、13:15。",
+  alNew:"新",alVol:"量",alNews:"新聞",alHist:"此警示的歷史表現",alAvg10:"10天後平均",alUp5:"漲到+5%",alDn5:"跌到−5%",alAny:"一般股票",
+  alHeadlines:"當下的新聞",alSector:"產業新聞（24小時）",alLevel:"觸發價位",alTime:"時間",alWatchNone:"今早沒有接近警示點的股票。",
+  alStatsNote:"全部台股 2 年資料。「一般股票」為比較用的平均。",alLive:"我們的警示目前成績（5天後）",alWith:"有新聞",alWithout:"沒新聞",alWait:"警示滿 5 個交易日後才會有結果。",
+  alType:"警示",alN:"次",premarket:"盤前",bull:"偏多",bear:"偏空",
   about:"僅供分析，不是投資建議。",dataFrom:"資料",lockT:"請輸入密碼",lockS:"這支手機只需要輸入一次。",lockB:"解鎖",lockE:"密碼錯誤",lockW:"解鎖中…",now:"現價",entry:"買進",heldD:"持有天數",group:"類別",price:"股價"}
 };
-let S = {lang: get("lang") || "en", col: get("col") || "tw", tab: "today", secFilter: "all"};
+let S = {lang: get("lang") || "en", col: get("col") || "tw", tab: "today", secFilter: "all", alView: "top"};
 let D = {report: null, fc: null, note: null, log: null, fetched: null, offline: false};
 
 function get(k){try{return localStorage.getItem("tsl-"+k)}catch(e){return null}}
@@ -187,9 +199,10 @@ async function load(force){
   const btn=document.getElementById("btnRefresh");btn.innerHTML='<span class="spin">⟳</span>';
   document.getElementById("status").textContent=t("loading");
   try{
-    const [rep,fc,log,note]=await Promise.all([fetchJ("report/latest.json"),fetchJ("report/forecast.json").catch(()=>null),
-      fetchJ("forecast_log.csv",true).then(parseCSV).catch(()=>[]),fetchJ("report/morning_note.json").catch(()=>null)]);
-    D={report:rep,fc:fc,log:log,note:note,fetched:new Date().toISOString(),offline:false};
+    const [rep,fc,log,note,al,ast]=await Promise.all([fetchJ("report/latest.json"),fetchJ("report/forecast.json").catch(()=>null),
+      fetchJ("forecast_log.csv",true).then(parseCSV).catch(()=>[]),fetchJ("report/morning_note.json").catch(()=>null),
+      fetchJ("report/alerts_latest.json").catch(()=>null),fetchJ("report/alert_stats.json").catch(()=>null)]);
+    D={report:rep,fc:fc,log:log,note:note,al:al,ast:ast,fetched:new Date().toISOString(),offline:false};
     put("cache",JSON.stringify(D));
   }catch(e){
     const c=get("cache");if(c){D=JSON.parse(c);D.offline=true}else{D.report=null}
@@ -208,7 +221,7 @@ function render(){
   const when=D.fetched?new Date(D.fetched).toLocaleString(S.lang==="zh"?"zh-TW":"en-GB",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
   st.textContent=(D.offline?t("offline")+" · ":"")+t("updated")+" "+when;
   document.getElementById("hdrsub").textContent=t("dataFrom")+" "+D.report.date+" · v"+VERSION;
-  ({today:rToday,ai:rAI,sectors:rSectors,picks:rPicks,paper:rPaper})[S.tab]();
+  ({today:rToday,ai:rAI,sectors:rSectors,picks:rPicks,alerts:rAlerts,paper:rPaper})[S.tab]();
 }
 function go(k){S.tab=k;window.scrollTo(0,0);render()}
 
@@ -308,6 +321,60 @@ function rPicks(){
 function openStock(code){
   const r=D.report,all=[...r.picks,...r.radar,...(r.focus?r.focus.stocks:[])],p=all.find(x=>x.code===code);if(!p)return;
   sheet(stockCard(p).replace('class="card"','class="card" style="border:0;background:none;padding:0"'));
+}
+
+/* ---------- ALERTS ---------- */
+function alLabel(type){const l=D.ast&&D.ast.labels&&D.ast.labels[type];return l?(S.lang==="zh"?l.zh:l.en):type}
+function alDir(type){const l=D.ast&&D.ast.labels&&D.ast.labels[type];return l?l.dir:"bull"}
+function alHist(type,ai){const t=D.ast&&D.ast.types&&D.ast.types[type];if(!t)return null;return (ai&&t.ai)?t.ai:t.all}
+function alRow(r,i){const dir=r.direction||alDir(r.type);
+  return `<div class="it" onclick="openAlert('${S.alView}',${i})"><div class="sp"><div class="nm">${esc(r.name)} <span class="cd">${esc(r.code)}</span></div>
+   <div class="cd"><span style="color:var(--${dir==="bull"?"up":"down"})">${dir==="bull"?"▲":"▼"} ${esc(alLabel(r.type))}</span> · ${esc(r.time_tpe)}${r.ai==1||r.ai==="1"?' · <span class="chip" style="padding:0 6px">AI</span>':""}</div></div>
+   <div class="r"><b>${num(r.price)}</b><div class="cd">${r.chg_pct!==""?pct(Number(r.chg_pct)/100):""}${r.vol_ratio?` · ${t("alVol")} ${Number(r.vol_ratio).toFixed(1)}x`:""}${Number(r.stock_news_n)>0?` · 📰${r.stock_news_n}`:""}</div></div></div>`}
+function rAlerts(){
+  const a=D.al,el=document.getElementById("tab-alerts"),v=S.alView;
+  let h=`<div class="seg">${[["top","alTop"],["ai","alAI"],["watch","alWatch"],["stats","alStats"]].map(([k,l])=>`<button class="${v===k?"on":""}" onclick="S.alView='${k}';render()">${t(l)}</button>`).join("")}</div>`;
+  if(a){h+=`<div class="card"><div class="row"><div class="mid">${t("alToday")}</div><div class="sp"></div><div class="mut">${esc(a.date)}</div></div><div style="margin-top:6px">`+
+    (a.checks||[]).map(c=>`<span class="chip">${c.check==="premarket"?t("premarket"):esc(c.time)} · ${c.new} ${t("alNew")}</span>`).join("")+`</div></div>`}
+  if(v==="stats"){el.innerHTML=h+alStatsHTML();return}
+  if(!a){el.innerHTML=h+`<div class="card empty">${t("alNone")}</div>`;return}
+  if(v==="watch"){const w=a.watch||[];
+    h+=w.length?`<div class="card list">`+w.map(x=>`<div class="it"><div class="sp"><div class="nm">${esc(x.name)} <span class="cd">${esc(x.code)}</span></div>
+      <div class="cd">${esc(S.lang==="zh"?x.group:(x.group_en||x.group))}</div><ul style="margin-top:2px">${(x["why_"+S.lang]||[]).map(y=>`<li>${esc(y)}</li>`).join("")}</ul></div><div class="r"><b>${num(x.price)}</b></div></div>`).join("")+`</div>`
+      :`<div class="card empty">${t("alWatchNone")}</div>`;
+    el.innerHTML=h;return}
+  const rows=v==="ai"?(a.ai||[]):(a.top||[]);
+  h+=rows.length?`<div class="card list">${rows.map(alRow).join("")}</div>`:`<div class="card empty">${t("alNone")}</div>`;
+  el.innerHTML=h;
+}
+function openAlert(view,i){
+  const a=D.al,r=(view==="ai"?a.ai:a.top)[i];if(!r)return;const dir=r.direction||alDir(r.type),hs=alHist(r.type,r.ai==1),b=D.ast&&D.ast.base;
+  const hl=(r.headlines||"").split(" | ").filter(x=>x);
+  sheet(`<div class="cd">${esc(r.code)} · ${esc(r.group)}</div><div class="mid">${esc(r.name)}</div>
+   <div style="margin:6px 0"><span class="chip" style="color:var(--${dir==="bull"?"up":"down"})">${dir==="bull"?"▲ "+t("bull"):"▼ "+t("bear")} · ${esc(alLabel(r.type))}</span></div>
+   <div class="grid3"><div class="tile">${t("price")}<b>${num(r.price)}</b></div><div class="tile">${t("alTime")}<b>${esc(r.time_tpe)}</b></div>
+   <div class="tile">${r.level?t("alLevel"):t("alVol")}<b>${r.level?num(r.level):(r.vol_ratio?Number(r.vol_ratio).toFixed(1)+"x":"–")}</b></div></div>
+   ${hs?`<div class="h2">${t("alHist")}</div><div class="grid3"><div class="tile">${t("alAvg10")}<b>${pct(hs.r10)}</b><span class="cd">${t("alAny")} ${pct(b.r10)}</span></div>
+     <div class="tile">${dir==="bull"?t("alUp5"):t("alDn5")}<b>${Math.round((dir==="bull"?hs.up5:hs.down5)*100)}%</b><span class="cd">${t("alAny")} ${Math.round((dir==="bull"?b.up5:b.down5)*100)}%</span></div>
+     <div class="tile">${t("alN")}<b>${num(hs.n)}</b></div></div>`:""}
+   <div class="h2">${t("alHeadlines")}</div>${hl.length?`<ul>${hl.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<div class="mut">–</div>`}
+   <div class="mut" style="margin-top:6px">${t("alSector")}: ${r.sector_news_n||0}</div>`);
+}
+function alStatsHTML(){
+  const s=D.ast;if(!s)return `<div class="card empty">–</div>`;const b=s.base;
+  let h=`<div class="card"><div class="mut">${t("alStatsNote")} (${esc(s.from)} → ${esc(s.to)})</div><div class="list" style="margin-top:6px">`;
+  const order=Object.keys(s.types).sort((x,y)=>((s.types[y].all||{}).r10||0)-((s.types[x].all||{}).r10||0));
+  h+=order.map(k=>{const a=s.types[k].all;if(!a)return "";const dir=alDir(k);
+    return `<div class="it"><div class="sp"><div class="nm" style="font-size:14px">${esc(alLabel(k))}</div><div class="cd">${num(a.n)} ${t("alN")} · ${dir==="bull"?t("alUp5"):t("alDn5")} ${Math.round((dir==="bull"?a.up5:a.down5)*100)}%</div></div>
+     <div class="r">${pct(a.r10)}<div class="cd">${t("alAvg10")}</div></div></div>`}).join("");
+  h+=`<div class="it"><div class="sp"><div class="nm" style="font-size:14px">${t("alAny")}</div></div><div class="r">${pct(b.r10)}</div></div></div></div>`;
+  const lv=s.live||{},ks=Object.keys(lv);
+  h+=`<div class="h2">${t("alLive")}</div><div class="card">`;
+  if(!ks.length)h+=`<div class="mut">${t("alWait")}</div>`;
+  else h+=`<div class="list">`+ks.map(k=>{const x=lv[k],w=x.with_news,n=x.no_news;
+    return `<div class="it"><div class="sp"><div class="nm" style="font-size:14px">${esc(alLabel(k))}</div><div class="cd">${x.all.n} ${t("alN")}</div></div>
+     <div class="r cd">${t("alWith")} ${w?pct(w.avg_r5):"–"}<br>${t("alWithout")} ${n?pct(n.avg_r5):"–"}</div></div>`}).join("")+`</div>`;
+  return h+`</div>`;
 }
 
 /* ---------- PAPER ---------- */

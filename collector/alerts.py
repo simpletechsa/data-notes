@@ -330,17 +330,46 @@ def run_live(tag):
     have = {(r["date"], r["code"], r["type"]) for r in log}
     new = [r for r in rows if (r["date"], r["code"], r["type"]) not in have]  # each stock+type alerted once per day
     write_log(month, log + new)
-    top = new[:10]
+    todays = [r for r in log + new if r["date"] == str(today)]
+    todays.sort(key=lambda r: float(r.get("rank") or 0), reverse=True)
+    top = todays[:12]  # strongest alerts of the whole day so far
     out = {"date": str(today), "check": tag, "time": qt.strftime("%H:%M"), "made": now.strftime("%H:%M"),
            "new_count": len(new), "total_today": len([r for r in log + new if r["date"] == str(today)]),
            "by_type": {k: sum(1 for r in new if r["type"] == k) for k in TYPES}, "top": top,
-           "ai": [r for r in new if r["ai"]][:15]}
+           "ai": [r for r in todays if str(r["ai"]) == "1"][:15]}
     prev = vault.read(os.path.join(DATA, "report", "alerts_latest.json"))
     prev = json.loads(prev) if prev else {}
     out["watch"] = prev.get("watch", []) if prev.get("date") == str(today) else []
     out["checks"] = (prev.get("checks", []) if prev.get("date") == str(today) else []) + [{"check": tag, "time": out["time"], "new": len(new)}]
     vault.write(os.path.join(DATA, "report", "alerts_latest.json"), json.dumps(out, ensure_ascii=False, default=str))
+    tg_live(tag, new, qt)
     print(f"{tag}: {len(rows)} alerts now, {len(new)} new; top:", [(r["code"], r["name"], r["type"]) for r in top[:5]])
+
+
+# ---------------------------------------------------------------- Telegram (only if the secrets exist)
+def telegram(text):
+    tok, chat = os.environ.get("TELEGRAM_TOKEN", "").strip(), os.environ.get("TELEGRAM_CHAT", "").strip()
+    if not tok or not chat:
+        return False
+    try:
+        data = urllib.parse.urlencode({"chat_id": chat, "text": text, "disable_web_page_preview": "true"}).encode()
+        urllib.request.urlopen(urllib.request.Request(f"https://api.telegram.org/bot{tok}/sendMessage", data=data), timeout=20)
+        return True
+    except Exception as e:
+        print("telegram failed:", e)
+        return False
+
+
+def tg_live(tag, new, qt):
+    bull = [r for r in new if r["direction"] == "bull"][:6]
+    ai = [r for r in new if str(r["ai"]) == "1" and r not in bull][:4]
+    if not bull and not ai:
+        return
+    line = lambda r: f"{'▲' if r['direction']=='bull' else '▼'} {r['name']} {r['code']}  {r['price']} ({r['chg_pct']:+}%)  {TYPES[r['type']][2]}" + (f"  📰{r['stock_news_n']}" if r.get("stock_news_n") else "")  # noqa: E731
+    msg = [f"stsa alerts {qt.strftime('%H:%M')} ({len(new)} new)"] + [line(r) for r in bull]
+    if ai:
+        msg += ["AI:"] + [line(r) for r in ai]
+    telegram("\n".join(msg))
 
 
 # ---------------------------------------------------------------- premarket watch list
@@ -390,6 +419,8 @@ def run_premarket():
            "watch": watch[:40], "watch_total": len(watch), "top": [], "ai": [], "new_count": 0, "total_today": 0, "by_type": {},
            "checks": [{"check": "premarket", "time": now.strftime("%H:%M"), "new": 0}]}
     vault.write(os.path.join(DATA, "report", "alerts_latest.json"), json.dumps(out, ensure_ascii=False, default=str))
+    if watch:
+        telegram("stsa watch list " + now.strftime("%m/%d") + "\n" + "\n".join(f"• {w['name']} {w['code']}  {w['price']}  " + "；".join(w["why_zh"]) for w in watch[:8]))
     print("premarket watch list:", len(watch), "stocks; top:", [(w["code"], w["name"]) for w in watch[:5]])
 
 
