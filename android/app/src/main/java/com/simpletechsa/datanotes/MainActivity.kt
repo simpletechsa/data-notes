@@ -33,8 +33,11 @@ class MainActivity : Activity() {
                 return true
             }
         }
-        // keep the page clear of the status bar and gesture bar so the top buttons can be tapped
-        web.setOnApplyWindowInsetsListener { v, insets ->
+        // keep the page clear of the status bar and gesture bar (Android 15 draws apps edge-to-edge)
+        val root = android.widget.FrameLayout(this)
+        root.setBackgroundColor(0xFF090D1A.toInt())
+        root.addView(web, android.widget.FrameLayout.LayoutParams(-1, -1))
+        root.setOnApplyWindowInsetsListener { v, insets ->
             if (android.os.Build.VERSION.SDK_INT >= 30) {
                 val b = insets.getInsets(android.view.WindowInsets.Type.systemBars() or android.view.WindowInsets.Type.displayCutout())
                 v.setPadding(b.left, b.top, b.right, b.bottom)
@@ -44,7 +47,7 @@ class MainActivity : Activity() {
             }
             insets
         }
-        setContentView(web)
+        setContentView(root)
         if (savedInstanceState != null) web.restoreState(savedInstanceState)
         else web.loadUrl("https://appassets.androidplatform.net/assets/index.html")
     }
