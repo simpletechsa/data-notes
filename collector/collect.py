@@ -330,9 +330,9 @@ def run_analysis(log):
         return "analysis FAILED"
 
 
-def run_script(name, log):
+def run_script(name, log, args=()):
     import subprocess
-    r = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), name)],
+    r = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), name), *args],
                        capture_output=True, text=True, timeout=900)
     if r.returncode != 0:
         log.append(f"{name} failed: " + r.stderr[-600:])
@@ -585,7 +585,7 @@ PLAN = {
     # 08:40 Taipei - Japan & Korea just opened, before Taiwan opens
     "asia_open": ["prices", "news", "ptt", "forecast"],
     # 16:40 Taipei - Taiwan closed, money-flow + revenue published
-    "tw_close": ["prices", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze"],
+    "tw_close": ["prices", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze", "score"],
     # 22:50 Taipei - US just opened; TWSE margin data is out by now
     "us_open": ["prices", "twse", "news", "ptt"],
     # 05:40 Taipei - US closed: final prices + why it moved
@@ -628,6 +628,8 @@ def main():
                 done.append(run_analysis(log))
             elif step == "forecast":
                 done.append(run_script("forecast.py", log))
+            elif step == "score":
+                done.append(run_script("forecast.py", log, ["--score"]))
         except Exception as e:
             log.append(f"{step} crashed: {e} {traceback.format_exc(limit=1)}")
     done.append(build_daily_signals())

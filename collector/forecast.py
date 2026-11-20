@@ -145,14 +145,44 @@ def score_yesterday(log_rows):
         if r.get("actual_close") or r["date"] not in bars:
             continue
         o, h, l, c = bars[r["date"]]
-        if None in (o, h, l, c) or r["date"] >= datetime.now(TPE).strftime("%Y-%m-%d"):
-            continue
+        now = datetime.now(TPE)
+        if None in (o, h, l, c) or r["date"] > now.strftime("%Y-%m-%d") or (r["date"] == now.strftime("%Y-%m-%d") and now.hour < 14):
+            continue  # today's result only after the market closes (13:30)
         pc = float(r["prev_close"])
         r.update({"actual_open": round(o, 2), "actual_high": round(h, 2), "actual_low": round(l, 2), "actual_close": round(c, 2),
                   "open_right": int((o > pc) == (float(r["pred_open"]) > pc)), "close_right": int((c > pc) == (float(r["pred_close"]) > pc))})
 
 
+def score_only():
+    """Evening run: mark today's forecast right/wrong and update the scorecard (no new forecast)."""
+    path = os.path.join(DATA, "forecast_log.csv")
+    txt = vault.read(path)
+    if not txt:
+        print("no forecasts yet")
+        return
+    rows = list(csv.DictReader(io.StringIO(txt.lstrip("\ufeff"))))
+    score_yesterday(rows)
+    fields = ["date", "made_at", "prev_close", "pred_open", "pred_close", "pred_high", "pred_low",
+              "actual_open", "actual_high", "actual_low", "actual_close", "open_right", "close_right"]
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=fields)
+    w.writeheader()
+    for r in sorted(rows, key=lambda r: r["date"]):
+        w.writerow({k: r.get(k, "") for k in fields})
+    vault.write(path, buf.getvalue())
+    done = [r for r in rows if r.get("actual_close")]
+    fj = vault.read(os.path.join(DATA, "report", "forecast.json"))
+    if fj:
+        res = json.loads(fj)
+        res["track_record"] = {"days": len(done), "open_right": sum(int(r["open_right"]) for r in done),
+                               "close_right": sum(int(r["close_right"]) for r in done), "last": done[-1] if done else None}
+        vault.write(os.path.join(DATA, "report", "forecast.json"), json.dumps(res, ensure_ascii=False, default=str))
+    print("scored", len(done), "days")
+
+
 def main():
+    if "--score" in sys.argv:
+        return score_only()
     now = datetime.now(TPE)
     today = now.date()
     df = history()
