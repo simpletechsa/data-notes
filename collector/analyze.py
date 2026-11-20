@@ -89,6 +89,8 @@ def build(df, uni):
         "volr": V.rolling(5).mean() / v60, "vol1": V / v60,
         "rsi": 100 - 100 / (1 + up / dn.replace(0, np.nan)),
         "vola": C.pct_change().rolling(20).std(),
+        "val5": (C * V).rolling(5, min_periods=3).sum(),            # money traded, last 5 days (成交值)
+        "val60": (C * V).rolling(60, min_periods=30).mean() * 5,    # normal 5-day money (60-day average)
     }
     value20 = (C * V).rolling(20, min_periods=10).mean()
     ind = uni["industry"].reindex(C.columns).fillna("其他")
@@ -132,31 +134,48 @@ def groups(uni, C):
     for name, codes in uni.groupby("industry").groups.items():
         if name in ("其他", "存託憑證"):
             continue
-        out[f"ind:{name}"] = {"zh": name, "en": IND_EN.get(name, name), "codes": [c for c in codes if c in C.columns], "kw": [name.replace("業", "")]}
+        short = name.replace("工業", "").replace("業", "")
+        out[f"ind:{name}"] = {"zh": name, "en": IND_EN.get(name, name), "codes": [c for c in codes if c in C.columns],
+                              "kw": [k for k in {short, short[:2]} if len(k) >= 2]}
     for t in load_cfg("themes.json")["themes"]:
         out[f"theme:{t['id']}"] = {"zh": t["zh"], "en": t["en"], "codes": [c for c in t["codes"] if c in C.columns], "kw": t["keywords"]}
     return out
 
 
 def heat_on(day, G, F, value20, extra=None):
-    """Heat score for every group on one day: rank of trend, breadth, volume (+ money flow & news when available)."""
+    """
+    HOT (熱度) = where the money and attention are: share of all money traded (成交值占比),
+                 money vs its normal level (量能放大), and news count (when available). Price is NOT part of it.
+    TREND (趨勢) = price direction only: up / down / flat.
+    """
     rows = []
+    liq_all = [c for c in value20.columns if value20.at[day, c] >= MIN_VALUE] if day in value20.index else []
+    total5 = float(F["val5"].loc[day, liq_all].sum()) or 1.0
     for gid, g in G.items():
         cs = [c for c in g["codes"] if value20.at[day, c] >= MIN_VALUE] if day in value20.index else []
         if len(cs) < 3:
             continue
+        v5, v60 = float(F["val5"].loc[day, cs].sum()), float(F["val60"].loc[day, cs].sum())
         r = {"gid": gid, "n": len(cs),
              "r5": F["r5"].loc[day, cs].median(), "r20": F["r20"].loc[day, cs].median(),
-             "breadth": (F["g20"].loc[day, cs] > 0).mean(), "volr": F["volr"].loc[day, cs].median()}
+             "breadth": (F["g20"].loc[day, cs] > 0).mean(), "volr": F["volr"].loc[day, cs].median(),
+             "share": v5 / total5, "surge": v5 / v60 if v60 else 1.0}
         if extra:
             r.update(extra(gid, g, cs))
         rows.append(r)
     h = pd.DataFrame(rows).set_index("gid")
-    cols = ["r5", "r20", "breadth", "volr"] + [c for c in ("flow", "buzz") if c in h.columns]
-    h["heat"] = h[cols].rank(pct=True).mean(axis=1) * 100
+    parts = {"share": 0.4, "surge": 0.3}
+    if "buzz" in h.columns and h["buzz"].sum() > 0:
+        parts["buzz"] = 0.3
+    else:  # no news data (history): money only
+        parts = {"share": 0.55, "surge": 0.45}
+    h["heat"] = sum(h[k].rank(pct=True) * w for k, w in parts.items()) * 100
     h = h.sort_values("heat", ascending=False)
     h["level"] = np.where(h["heat"].rank(ascending=False) <= N_HOT, "hot",
                           np.where(h["heat"] >= h["heat"].quantile(0.5), "warm", "cold"))
+    up = (h["r20"] > 0.03) & (h["r5"] > -0.02) & (h["breadth"] >= 0.5)
+    down = (h["r20"] < -0.03) & (h["r5"] < 0.02) & (h["breadth"] < 0.5)
+    h["trend"] = np.where(up, "up", np.where(down, "down", "flat"))
     return h
 
 
@@ -424,6 +443,7 @@ def main():
         ai_rows.sort(key=lambda d: d["score"], reverse=True)
         ai_picks = [d for d in ai_rows if d["code"] not in {p["code"] for p in picks}][:3]
     ai_heat = [{"gid": g, "zh": G[g]["zh"], "en": G[g]["en"], "level": heat.at[g, "level"], "heat": float(heat.at[g, "heat"]),
+                "trend": heat.at[g, "trend"], "share": float(heat.at[g, "share"]), "surge": float(heat.at[g, "surge"]),
                 "r5": float(heat.at[g, "r5"]), "r20": float(heat.at[g, "r20"]), "breadth": float(heat.at[g, "breadth"])}
                for g in fthemes if g in heat.index]
     ai_heat.sort(key=lambda h: h["heat"], reverse=True)
@@ -440,6 +460,7 @@ def main():
              "open": [clean(t) for t in openp], "pending": [clean(t) for t in trades if t["status"] == "pending"],
              "recent_closed": [clean(t) for t in sorted(closed, key=lambda t: str(t.get("exit_date", "")))[-30:]]}
     heat_rows = [{"gid": gid, "zh": G[gid]["zh"], "en": G[gid]["en"], "level": r["level"], "heat": float(r["heat"]),
+                  "trend": r["trend"], "share": float(r["share"]), "surge": float(r["surge"]),
                   "r5": float(r["r5"]), "r20": float(r["r20"]), "breadth": float(r["breadth"]), "n": int(r["n"]),
                   "buzz": int(r.get("buzz", 0) or 0)} for gid, r in heat.iterrows()]
     out = {"date": str(today.date()), "generated_tpe": datetime.now(TPE).strftime("%Y-%m-%d %H:%M"), "stats": stats, "focus": focus,
