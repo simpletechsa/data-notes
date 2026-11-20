@@ -19,3 +19,4 @@ vault.NoKey: DATA_KEY is not set - private files are not written
 "
 2026-11-20 11:19:51,tw_close,184,"catch-up: nothing missed ; prices +0 new rows, snapshots +29 ; money-flow +6, per-stock +6, margin +6, all-stock flow +1091 ; revenue +0 ; news +593 new headlines ; ptt +47 new posts ; market prices +1943 rows (1986 stocks) ; revenue(all) +0 ; analysis + report done ; daily signals 94 rows",
 2026-11-20 12:04:06,alerts,55,catch-up: nothing missed ; news +596 new headlines ; alerts.py done ; daily signals 94 rows,
+2026-11-20 14:27:31,fear_backfill,1331,catch-up: nothing missed ; fear.py done ; fear.py done ; daily signals 94 rows,
