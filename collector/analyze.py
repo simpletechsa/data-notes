@@ -325,6 +325,90 @@ def update_paper(W, new_picks, today):
     return trades
 
 
+# ---------------------------------------------------------------- big money (外資/投信/融資) + futures gap
+def money_card():
+    def rd(name):
+        f = os.path.join(DATA, name)
+        return pd.read_csv(f, encoding="utf-8-sig") if os.path.exists(f) else pd.DataFrame()
+    out = {}
+    inst = rd("inst_market.csv")
+    for key, label in (("foreign", "外資及陸資(不含外資自營商)"), ("trust", "投信"), ("total", "合計")):
+        d = inst[inst["investor"] == label].sort_values("date") if not inst.empty else pd.DataFrame()
+        if d.empty:
+            continue
+        net = d["net"].astype(float).values / 1e8  # 億
+        sign = np.sign(net[-1])
+        streak = 0
+        for v in net[::-1]:
+            if np.sign(v) == sign and v != 0:
+                streak += 1
+            else:
+                break
+        out[key] = {"date": d["date"].iloc[-1], "today": round(float(net[-1]), 1), "streak": int(streak * (1 if sign > 0 else -1)),
+                    "sum5": round(float(net[-5:].sum()), 1), "sum20": round(float(net[-20:].sum()), 1), "days": int(len(net))}
+    mg = rd("margin.csv")
+    if not mg.empty:
+        d = mg[mg["item"] == "融資金額(仟元)"].sort_values("date")
+        if len(d):
+            bal = d["balance"].astype(float).values / 1e5  # 億
+            out["margin"] = {"date": d["date"].iloc[-1], "balance": round(float(bal[-1]), 1),
+                             "change": round(float(bal[-1] - d["prev_balance"].astype(float).values[-1] / 1e5), 1),
+                             "change5_pct": round(float((bal[-1] / bal[-6] - 1) * 100), 2) if len(bal) >= 6 else None}
+    bs = rd("futures/basis.csv")
+    if not bs.empty:
+        bs = bs.dropna(subset=["basis_pct"]).sort_values("date")
+        if len(bs):
+            last = bs.iloc[-1]
+            out["basis"] = {"date": last["date"], "taiex": float(last["taiex"]), "fut": float(last["fut_close"]),
+                            "points": float(last["basis"]), "pct": float(last["basis_pct"])}
+    return out
+
+
+# ---------------------------------------------------------------- Taiwan vs Korea memory/chips gap (info only)
+def korea_gap(C):
+    th = {t["id"]: t["codes"] for t in load_cfg("themes.json")["themes"]}
+    f = os.path.join(DATA, "prices.csv")
+    if not os.path.exists(f):
+        return None
+    p = pd.read_csv(f, encoding="utf-8-sig")
+    p["date"] = pd.to_datetime(p["date"])
+    kr = p[p.symbol.isin(["000660.KS", "005930.KS"])].pivot(index="date", columns="symbol", values="close").pct_change()
+    out = {}
+    for name, ids in (("memory", ["dram", "memory_module", "ssd_nand"]), ("chips", ["foundry", "ic_design", "adv_packaging", "equipment", "testing"])):
+        cs = [c for i in ids for c in th.get(i, []) if c in C.columns]
+        tw = C[cs].pct_change().median(axis=1).dropna()
+        if not len(tw) or not len(kr):
+            continue
+        d = tw.index[-1]
+        k = kr[kr.index <= d].iloc[-1]
+        out[name] = {"date": str(d.date()), "tw": float(tw.iloc[-1]), "kr_hynix": float(k.get("000660.KS", np.nan)),
+                     "kr_samsung": float(k.get("005930.KS", np.nan)), "gap": float(tw.iloc[-1] - k.mean())}
+    out["note_en"] = "History (2y): when TW memory was 4%+ stronger than Korea, TW memory rose +4.2% avg next 5 days (65% up, 48 cases). TW much weaker than Korea did NOT bounce back."
+    out["note_zh"] = "歷史（2年）：台灣記憶體比韓國強 4% 以上時，之後 5 天平均 +4.2%（65% 上漲，48 次）。台灣比韓國弱很多時，並沒有反彈。"
+    return out
+
+
+# ---------------------------------------------------------------- strength list (info only, honest numbers)
+def strength_list(uni, W, C, hot_codes, G, code_group):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import alerts as AL
+    S, _, X = AL.signals(W)
+    d = C.index[-1]
+    liq = ((C * W["volume"]).rolling(20, min_periods=10).mean().loc[d] >= MIN_VALUE) & (C.loc[d] >= MIN_PRICE)
+    rows = []
+    for typ in ("new_high52", "break_high20"):
+        hits = S[typ].loc[d].fillna(False) & liq
+        for c in hits.index[hits.values.astype(bool)]:
+            gid = code_group.get(c)
+            rows.append({"code": c, "name": str(uni["name"].get(c, c)), "type": typ, "price": float(C.at[d, c]),
+                         "vol_ratio": float(X["vr"].at[d, c]) if pd.notna(X["vr"].at[d, c]) else None, "hot": int(c in hot_codes),
+                         "group_zh": G[gid]["zh"] if gid else str(uni["industry"].get(c, "")), "group_en": G[gid]["en"] if gid else ""})
+    rows.sort(key=lambda r: (r["hot"], r["type"] == "new_high52", r["vol_ratio"] or 0), reverse=True)
+    return {"items": rows[:15], "count": len(rows),
+            "note_en": "New highs / breakouts. History: +3.7% avg in 10 days, but the typical one was slightly negative and 2 of 3 dipped 5%+ first. A few big winners carry the average.",
+            "note_zh": "創新高／突破。歷史：10 天平均 +3.7%，但一般個股略為負報酬，且三分之二會先跌 5% 以上。平均值是少數大漲股撐起來的。"}
+
+
 # ---------------------------------------------------------------- main
 def main():
     os.makedirs(REP, exist_ok=True)
@@ -464,6 +548,7 @@ def main():
                   "r5": float(r["r5"]), "r20": float(r["r20"]), "breadth": float(r["breadth"]), "n": int(r["n"]),
                   "buzz": int(r.get("buzz", 0) or 0)} for gid, r in heat.iterrows()]
     out = {"date": str(today.date()), "generated_tpe": datetime.now(TPE).strftime("%Y-%m-%d %H:%M"), "stats": stats, "focus": focus,
+           "money": money_card(), "korea_gap": korea_gap(C), "strength": strength_list(uni, W, C, hot_codes, G, code_group),
            "heat": heat_rows, "picks": picks, "radar": radar, "paper": paper,
            "plan": {"target": TARGET, "stop": STOP, "max_days": MAX_DAYS, "cost": COST}}
     vault.write(os.path.join(REP, "latest.json"), json.dumps(out, ensure_ascii=False, default=str))

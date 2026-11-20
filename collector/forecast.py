@@ -63,7 +63,18 @@ def history():
                 r[k] = a["open"].iat[j] / a["close"].iat[j - 1] - 1
             else:
                 rows.append(r)
-    return pd.DataFrame(rows).set_index("date").replace([np.inf, -np.inf], np.nan).dropna()
+    df = pd.DataFrame(rows).set_index("date").replace([np.inf, -np.inf], np.nan).dropna()
+    fp = os.path.join(DATA, "futures", "tx_front.csv")
+    if os.path.exists(fp):  # night futures (夜盤): night close vs previous day-session close
+        fm = pd.read_csv(fp, parse_dates=["date"])
+        day, night = fm[fm.session == "day"].set_index("date")["close"], fm[fm.session == "night"].set_index("date")["close"]
+        fut = {}
+        for T in df.index:
+            prev = day[day.index < T]
+            if T in night.index and len(prev):
+                fut[T] = night[T] / prev.iloc[-1] - 1
+        df["fut"] = pd.Series(fut)
+    return df
 
 
 def fit(df, target):
@@ -109,6 +120,22 @@ def taiex_prev_close(today):
                 pass
         d -= timedelta(days=1)
     return None, None
+
+
+def night_futures():
+    """Last night's TAIEX futures (台指期夜盤) move vs the previous day session close. Real-time source: TAIFEX."""
+    try:
+        req = urllib.request.Request("https://mis.taifex.com.tw/futures/api/getQuoteList", method="POST", headers={**UA, "Content-Type": "application/json"},
+                                     data=json.dumps({"MarketType": "1", "SymbolType": "F", "KindID": "1", "CID": "TXF", "ExpireMonth": "",
+                                                      "RowSize": "全部", "PageNo": "", "SortColumn": "", "AscDesc": "A"}).encode())
+        q = json.loads(urllib.request.urlopen(req, timeout=30).read())["RtData"]["QuoteList"]
+        q = [r for r in q if r["SymbolID"].startswith("TXF") and not r["SymbolID"].endswith("-S") and r.get("CLastPrice")]
+        r = max(q, key=lambda r: float(r.get("CTotalVolume") or 0))
+        last, ref = float(r["CLastPrice"]), float(r["CRefPrice"])
+        return last / ref - 1, {"contract": r["DispCName"], "last": last, "ref": ref, "date": r["CDate"], "time": r["CTime"]}
+    except Exception as e:
+        print("night futures unavailable:", e, file=sys.stderr)
+        return None, None
 
 
 def live_inputs(today):
@@ -186,15 +213,26 @@ def main():
     now = datetime.now(TPE)
     today = now.date()
     df = history()
+    x, info = live_inputs(today)
+    fut, fut_info = night_futures()
+    global FEATS
+    if fut is not None and "fut" in df.columns and fut_info and fut_info["date"] >= (today - timedelta(days=4)).strftime("%Y%m%d"):
+        FEATS = FEATS + ["fut"]
+        x["fut"], info["fut"] = fut, fut
+        df = df.dropna(subset=["fut"])
     bt = backtest(df)
     coefs = {t: fit(df, t) for t in ["open_gap", "close_ret", "high_ret", "low_ret"]}
-    x, info = live_inputs(today)
     pdate, pclose = taiex_prev_close(today)
     pred = {t: predict(coefs[t], x) for t in coefs}
     pred["high_ret"] = max(pred["high_ret"], pred["open_gap"], pred["close_ret"])
     pred["low_ret"] = min(pred["low_ret"], pred["open_gap"], pred["close_ret"])
+    # panic / rally mode: big overnight moves -> real day is often bigger than the model says, so widen the range
+    big = abs(x.get("fut", 0)) > 0.015 or any(abs(v) > 0.03 for k, v in x.items() if k != "fut")
+    if big:
+        pred["high_ret"] += bt["high_ret"]["mae"]
+        pred["low_ret"] -= bt["low_ret"]["mae"]
     res = {"date": str(today), "made_at": now.strftime("%H:%M"), "prev_close_date": str(pdate), "prev_close": pclose,
-           "inputs": info, "pred": pred, "backtest": bt,
+           "inputs": info, "pred": pred, "backtest": bt, "panic": bool(big), "night_futures": fut_info, "uses_futures": "fut" in FEATS,
            "levels": {k: round(pclose * (1 + v), 0) for k, v in pred.items()} if pclose else {}}
     if not os.environ.get("DATA_KEY"):
         # no key (e.g. the phone-message task): just print today's forecast, save nothing private

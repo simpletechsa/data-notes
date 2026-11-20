@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -23,6 +24,7 @@ class MainActivity : Activity() {
         web.setBackgroundColor(0xFF090D1A.toInt())
         web.settings.javaScriptEnabled = true
         web.settings.domStorageEnabled = true
+        web.addJavascriptInterface(LiveBridge(), "Native")
         web.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(view: WebView, req: WebResourceRequest): WebResourceResponse? =
                 assets.shouldInterceptRequest(req.url)
@@ -64,6 +66,26 @@ class MainActivity : Activity() {
                 @Suppress("DEPRECATION")
                 super.onBackPressed()
             }
+        }
+    }
+
+    /** Lets the page read live TAIEX / futures quotes from TAIFEX (no other site allowed). */
+    class LiveBridge {
+        @JavascriptInterface
+        fun post(url: String, body: String): String {
+            return try {
+                val u = java.net.URL(url)
+                if (u.host != "mis.taifex.com.tw") return ""
+                val c = u.openConnection() as java.net.HttpURLConnection
+                c.requestMethod = "POST"
+                c.connectTimeout = 10000
+                c.readTimeout = 10000
+                c.doOutput = true
+                c.setRequestProperty("Content-Type", "application/json")
+                c.setRequestProperty("User-Agent", "Mozilla/5.0")
+                c.outputStream.use { it.write(body.toByteArray()) }
+                c.inputStream.bufferedReader().use { it.readText() }
+            } catch (e: Exception) { "" }
         }
     }
 }

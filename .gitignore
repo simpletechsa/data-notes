@@ -13,3 +13,4 @@ data/report/*.html
 data/paper_trades.csv
 data/forecast_log.csv
 data/alerts/*.csv
+data/futures/tx_history.csv

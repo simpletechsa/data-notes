@@ -330,6 +330,64 @@ def run_analysis(log):
         return "analysis FAILED"
 
 
+def collect_futures(log):
+    """TAIEX futures day + night sessions (台指期 一般/盤後), official TAIEX close, and the gap between them (正/逆價差)."""
+    import io as _io
+    today = now_tpe().date()
+    start = today - timedelta(days=20)
+    rows = []
+    try:
+        data = urllib.parse.urlencode({"down_type": "1", "commodity_id": "TX", "queryStartDate": start.strftime("%Y/%m/%d"),
+                                       "queryEndDate": today.strftime("%Y/%m/%d")}).encode()
+        raw = urllib.request.urlopen(urllib.request.Request("https://www.taifex.com.tw/cht/3/futDataDown", data=data, headers={"User-Agent": UA}),
+                                     timeout=60).read().decode("big5", errors="replace")
+        for x in list(csv.reader(_io.StringIO(raw)))[1:]:
+            if len(x) > 17 and "/" not in x[2] and num(x[6]) is not None:
+                rows.append({"date": x[0].replace("/", "-"), "contract": x[2].strip(), "open": num(x[3]), "high": num(x[4]),
+                             "low": num(x[5]), "close": num(x[6]), "volume": num(x[9]) or 0, "session": "night" if x[17].strip() == "盤後" else "day"})
+    except Exception as e:
+        log.append(f"futures: {e}")
+    front = {}
+    for r in read_csv("futures/tx_front.csv") + rows:  # main contract = most traded per date+session
+        k = (r["date"], r["session"])
+        if k not in front or float(r["volume"] or 0) > float(front[k]["volume"] or 0):
+            front[k] = r
+    a = upsert_csv("futures/tx_front.csv", ["date", "contract", "open", "high", "low", "close", "volume", "session"],
+                   list(front.values()), ["date", "session"])
+    # official TAIEX close (Yahoo sometimes misses it) + futures gap
+    have = {r["date"] for r in read_csv("futures/basis.csv")}
+    out = []
+    for d in twse_days(8):
+        ds = d.isoformat()
+        if ds in have or d > today:
+            continue
+        try:
+            j = fetch_json(f"https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date={d:%Y%m%d}&type=IND&response=json")
+            idx = None
+            for t in j.get("tables", []):
+                for r in t.get("data", []):
+                    if r and r[0].strip() == "發行量加權股價指數":
+                        idx = num(r[1])
+            fut = front.get((ds, "day"))
+            if idx:
+                out.append({"date": ds, "taiex": idx, "fut_close": fut["close"] if fut else "",
+                            "basis": round(float(fut["close"]) - idx, 2) if fut else "",
+                            "basis_pct": round((float(fut["close"]) / idx - 1) * 100, 3) if fut else ""})
+        except Exception as e:
+            log.append(f"TAIEX {ds}: {e}")
+        time.sleep(3)
+    b = upsert_csv("futures/basis.csv", ["date", "taiex", "fut_close", "basis", "basis_pct"], out, ["date"])
+    # patch Yahoo's missing TAIEX closes with the official number
+    fix = [{"date": r["date"], "symbol": "^TWII", "name_zh": "台灣加權指數", "name_en": "Taiwan TAIEX", "group": "taiwan",
+            "open": r["taiex"], "high": r["taiex"], "low": r["taiex"], "close": r["taiex"], "volume": 0}
+           for r in out if r["taiex"]]
+    have_tw = {r["date"] for r in read_csv("prices.csv") if r["symbol"] == "^TWII"}
+    fix = [f for f in fix if f["date"] not in have_tw]
+    if fix:
+        upsert_csv("prices.csv", ["date", "symbol", "name_zh", "name_en", "group", "open", "high", "low", "close", "volume"], fix, ["date", "symbol"])
+    return f"futures +{a}, gap days +{b}, TAIEX fixes {len(fix)}"
+
+
 def run_script(name, log, args=()):
     import subprocess
     r = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), name), *args],
@@ -583,11 +641,11 @@ def build_daily_signals():
 # ---------------------------------------------------------------- main
 PLAN = {
     # 08:40 Taipei - Japan & Korea just opened, before Taiwan opens
-    "asia_open": ["prices", "news", "ptt", "forecast", "alerts_pre"],
+    "asia_open": ["prices", "futures", "news", "ptt", "forecast", "alerts_pre"],
     # 09:20 / 10:00 / 12:00 / 13:15 Taipei - live alert scans of all stocks (with the news at that moment)
     "alerts": ["news", "alerts_live"],
     # 16:40 Taipei - Taiwan closed, money-flow + revenue published
-    "tw_close": ["prices", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze", "score", "alerts_followup"],
+    "tw_close": ["prices", "futures", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze", "score", "alerts_followup"],
     # 22:50 Taipei - US just opened; TWSE margin data is out by now
     "us_open": ["prices", "twse", "news", "ptt"],
     # 05:40 Taipei - US closed: final prices + why it moved
@@ -631,6 +689,8 @@ def main():
                 done.append(run_analysis(log))
             elif step == "forecast":
                 done.append(run_script("forecast.py", log))
+            elif step == "futures":
+                done.append(collect_futures(log))
             elif step == "alerts_pre":
                 done.append(run_script("alerts.py", log, ["premarket"]))
             elif step == "alerts_live":
