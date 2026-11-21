@@ -226,13 +226,32 @@ def main():
     pred = {t: predict(coefs[t], x) for t in coefs}
     pred["high_ret"] = max(pred["high_ret"], pred["open_gap"], pred["close_ret"])
     pred["low_ret"] = min(pred["low_ret"], pred["open_gap"], pred["close_ret"])
+    # VIX (US fear index) tells how BIG Taiwan's day tends to be (not which way): widen the range on nervous days
+    vix, vfac = None, 1.0
+    try:
+        pv = pd.read_csv(os.path.join(DATA, "prices.csv"), encoding="utf-8-sig")
+        pv["date"] = pd.to_datetime(pv["date"])
+        vs = pv[pv.symbol == "^VIX"].drop_duplicates("date").set_index("date")["close"].sort_index()
+        vix = float(vs[vs.index < pd.Timestamp(today)].iloc[-1])
+        hist_v = pd.Series([vs[vs.index < T].iloc[-1] if (vs.index < T).any() else np.nan for T in df.index], index=df.index)
+        mv = df["close_ret"].abs()
+        bucket = pd.cut(hist_v, [0, 20, 25, 30, 999])
+        fac = (mv.groupby(bucket, observed=True).mean() / mv.mean()).to_dict()
+        for k, f in fac.items():
+            if k.left < vix <= k.right:
+                vfac = max(1.0, float(f))  # only ever widen
+        pred["high_ret"] = pred["close_ret"] + (pred["high_ret"] - pred["close_ret"]) * vfac
+        pred["low_ret"] = pred["close_ret"] + (pred["low_ret"] - pred["close_ret"]) * vfac
+    except Exception as e:
+        print("vix:", e, file=sys.stderr)
     # panic / rally mode: big overnight moves -> real day is often bigger than the model says, so widen the range
-    big = abs(x.get("fut", 0)) > 0.015 or any(abs(v) > 0.03 for k, v in x.items() if k != "fut")
+    big = abs(x.get("fut", 0)) > 0.015 or any(abs(v) > 0.03 for k, v in x.items() if k != "fut") or (vix or 0) > 30
     if big:
         pred["high_ret"] += bt["high_ret"]["mae"]
         pred["low_ret"] -= bt["low_ret"]["mae"]
     res = {"date": str(today), "made_at": now.strftime("%H:%M"), "prev_close_date": str(pdate), "prev_close": pclose,
            "inputs": info, "pred": pred, "backtest": bt, "panic": bool(big), "night_futures": fut_info, "uses_futures": "fut" in FEATS,
+           "vix": vix, "vix_range_factor": round(vfac, 2),
            "levels": {k: round(pclose * (1 + v), 0) for k, v in pred.items()} if pclose else {}}
     if not os.environ.get("DATA_KEY"):
         # no key (e.g. the phone-message task): just print today's forecast, save nothing private
