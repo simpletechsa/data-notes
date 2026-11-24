@@ -44,3 +44,4 @@ vault.NoKey: DATA_KEY is not set - private files are not written
 "
 2026-11-24 13:31:35,us_close,69,"catch-up: nothing missed ; prices +4 new rows, snapshots +29 ; news +576 new headlines ; ptt +36 new posts ; fear.py done ; daily signals 136 rows",
 2026-11-24 18:24:39,asia_open,79,"catch-up: nothing missed ; prices +1 new rows, snapshots +29 ; futures +1, gap days +1, TAIEX fixes 0, foreign-futures +1, put/call +1 ; news +562 new headlines ; ptt +48 new posts ; fear.py done ; forecast.py done ; calendar_events.py done ; bottom.py done ; alerts.py done ; daily signals 136 rows",
+2026-11-24 19:09:10,alerts,62,catch-up: nothing missed ; news +553 new headlines ; fear.py done ; alerts.py done ; daily signals 136 rows,
