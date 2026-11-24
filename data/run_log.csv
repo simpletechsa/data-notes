@@ -42,3 +42,4 @@ vault.NoKey: DATA_KEY is not set - private files are not written
     raise NoKey(""DATA_KEY is not set - private files are not written"")
 vault.NoKey: DATA_KEY is not set - private files are not written
 "
+2026-11-24 13:31:35,us_close,69,"catch-up: nothing missed ; prices +4 new rows, snapshots +29 ; news +576 new headlines ; ptt +36 new posts ; fear.py done ; daily signals 136 rows",
