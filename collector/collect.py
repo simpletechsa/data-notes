@@ -667,7 +667,7 @@ PLAN = {
     "fear_backfill": ["fear_backfill"],
     # 16:40 Taipei - Taiwan closed, money-flow + revenue published
     "tw_close": ["prices", "futures", "twse", "revenue", "news", "ptt", "fear", "market", "revenue_all", "analyze", "score",
-                 "alerts_followup", "bottom", "events", "fear_test"],
+                 "alerts_followup", "bottom", "events", "fear_test", "follow"],
     # 22:50 Taipei - US just opened; TWSE margin data is out by now
     "us_open": ["prices", "twse", "news", "ptt", "fear"],
     # 05:40 Taipei - US closed: final prices + why it moved
@@ -730,6 +730,8 @@ def main():
                 done.append(run_script("calendar_events.py", log))
             elif step == "bottom":
                 done.append(run_script("bottom.py", log))
+            elif step == "follow":
+                done.append(run_script("follow.py", log))
             elif step == "score":
                 done.append(run_script("forecast.py", log, ["--score"]))
         except Exception as e:
