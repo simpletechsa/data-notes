@@ -50,4 +50,14 @@ vault.NoKey: DATA_KEY is not set - private files are not written
 2026-11-24 23:49:56,alerts,82,catch-up: nothing missed ; news +563 new headlines ; fear.py done ; alerts.py done ; daily signals 136 rows,
 2026-11-25 03:46:03,tw_close,212,"catch-up: nothing missed ; prices +9 new rows, snapshots +29 ; futures +0, gap days +0, TAIEX fixes 0, foreign-futures +0, put/call +0 ; money-flow +6, per-stock +6, margin +3, all-stock flow +1887 ; revenue +0 ; news +565 new headlines ; ptt +45 new posts ; fear.py done ; market prices +1977 rows (1986 stocks) ; revenue(all) +0 ; analysis + report done ; forecast.py done ; alerts.py done ; bottom.py done ; calendar_events.py done ; fear.py done ; daily signals 147 rows",foreign futures/PC: HTTP Error 520: <none>
 2026-11-25 07:41:56,us_open,73,"catch-up: nothing missed ; prices +0 new rows, snapshots +29 ; money-flow +0, per-stock +0, margin +0, all-stock flow +0 ; news +574 new headlines ; ptt +47 new posts ; fear.py done ; daily signals 147 rows",
-2026-11-25 12:35:50,us_close,61,"catch-up: nothing missed ; prices +15 new rows, snapshots +29 ; news +575 new headlines ; ptt +49 new posts ; fear.py done ; daily signals 147 rows",
+2026-11-25 13:35:26,asia_open,92,"catch-up: nothing missed ; prices +19 new rows, snapshots +29 ; futures +1, gap days +0, TAIEX fixes 0, foreign-futures +0, put/call +0 ; news +569 new headlines ; ptt +37 new posts ; fear.py done ; forecast.py done ; calendar_events.py done ; bottom.py done ; alerts.py FAILED ; daily signals 147 rows","alerts.py failed: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 42, in write
+    f.write(enc(text.encode(""utf-8"")))
+            ~~~^^^^^^^^^^^^^^^^^^^^^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 31, in enc
+    return MAGIC + n + AESGCM(key()).encrypt(n, data, None)
+                              ~~~^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 25, in key
+    raise NoKey(""DATA_KEY is not set - private files are not written"")
+vault.NoKey: DATA_KEY is not set - private files are not written
+"
