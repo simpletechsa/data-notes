@@ -63,3 +63,4 @@ vault.NoKey: DATA_KEY is not set - private files are not written
 "
 2026-11-25 17:06:27,asia_open,112,"catch-up: nothing missed ; prices +1 new rows, snapshots +29 ; futures +0, gap days +1, TAIEX fixes 0, foreign-futures +1, put/call +1 ; news +568 new headlines ; ptt +41 new posts ; fear.py done ; forecast.py done ; calendar_events.py done ; bottom.py done ; alerts.py done ; daily signals 147 rows",futures: HTTP Error 520: <none>
 2026-11-25 17:56:56,alerts,67,catch-up: nothing missed ; news +568 new headlines ; fear.py done ; alerts.py done ; daily signals 147 rows,
+2026-11-25 18:47:51,alerts,80,catch-up: nothing missed ; news +565 new headlines ; fear.py done ; alerts.py done ; daily signals 147 rows,
