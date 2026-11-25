@@ -89,7 +89,7 @@ const TABS = [
 const T = {
  en:{app:"stsa Market Lab",today:"Today",ai:"AI",sectors:"Sectors",picks:"Picks",paper:"Paper",
   fc:"Morning forecast",open:"Open",close:"Close",range:"Today's range",high:"High",low:"Low",prev:"Prev close",
-  inputs:"What moved overnight",sox:"SOX (US chips)",fut:"Night futures",ndx:"Nasdaq",tsm:"TSMC ADR",jp:"Nikkei",kr:"KOSPI",hynix:"SK Hynix",
+  inputs:"What moved overnight",sox:"SOX (US chips)",fut:"Night futures",ndx:"Nasdaq",tsm:"TSMC ADR",jp:"Nikkei",kr:"KOSPI",hynix:"SK Hynix",vixl:"VIX (US fear index)",vixw:"range widened",
   why:"Why",sure:"How sure (backtest)",openDir:"Open direction right",closeDir:"Close direction right",
   score:"Scorecard",scoreNone:"Tracking starts with the first forecast.",right:"right",wrong:"wrong",predicted:"Predicted",actual:"Actual",days:"days",
   extreme:"Big moves overnight — on panic or rally days the real move is often bigger than the forecast.",
@@ -126,7 +126,7 @@ const T = {
   about:"Analysis only — not investment advice.",dataFrom:"Data",lockT:"Enter password",lockS:"Only needed once on this phone.",lockB:"Unlock",lockE:"Wrong password",lockW:"Unlocking…",now:"Now",entry:"Entry",heldD:"days held",group:"Group",price:"Price"},
  zh:{app:"stsa 市場研究室",today:"今日",ai:"AI",sectors:"產業",picks:"選股",paper:"模擬",
   fc:"盤前預測",open:"開盤",close:"收盤",range:"今日區間",high:"最高",low:"最低",prev:"昨收",
-  inputs:"隔夜市場變化",sox:"費半",fut:"台指期夜盤",ndx:"那斯達克",tsm:"台積電ADR",jp:"日經",kr:"韓股KOSPI",hynix:"SK海力士",
+  inputs:"隔夜市場變化",sox:"費半",fut:"台指期夜盤",ndx:"那斯達克",tsm:"台積電ADR",jp:"日經",kr:"韓股KOSPI",hynix:"SK海力士",vixl:"VIX恐慌指數",vixw:"區間已放寬",
   why:"原因",sure:"準確度（回測）",openDir:"開盤方向正確率",closeDir:"收盤方向正確率",
   score:"成績單",scoreNone:"從第一次預測開始記錄。",right:"正確",wrong:"錯誤",predicted:"預測",actual:"實際",days:"天",
   extreme:"隔夜波動很大 — 恐慌或大漲的日子，實際幅度常比預測更大。",
@@ -327,7 +327,7 @@ function rToday(){
     const ext=f.panic!==undefined?f.panic:Object.values(f.inputs||{}).some(v=>v!=null&&Math.abs(v)>0.03);
     if(ext)h+=`<div class="warnbox" style="margin:12px 0 0">${t(f.panic!==undefined?"panic":"extreme")}</div>`;
     h+=`</div>`;
-    h+=`<div class="h2">${t("inputs")}</div><div class="card"><div class="grid3">`+["sox","ndx","tsm","jp","kr","hynix"].concat(f.inputs&&f.inputs.fut!=null?["fut"]:[]).map(k=>`<div class="tile"><span class="mut">${t(k)}</span><b>${pct(f.inputs[k])}</b></div>`).join("")+`</div></div>`;
+    h+=`<div class="h2">${t("inputs")}</div><div class="card"><div class="grid3">`+["sox","ndx","tsm","jp","kr","hynix"].concat(f.inputs&&f.inputs.fut!=null?["fut"]:[]).map(k=>`<div class="tile"><span class="mut">${t(k)}</span><b>${pct(f.inputs[k])}</b></div>`).join("")+`</div>`+(f.vix!=null?`<div class="row" style="margin-top:10px"><span class="mut">${t("vixl")}</span><div class="sp"></div><b>${Number(f.vix).toFixed(1)}</b>${f.vix_range_factor>1?`<span class="mut" style="margin-left:8px">· ${t("vixw")} ×${f.vix_range_factor}</span>`:""}</div>`:"")+`</div>`;
     if(D.note&&D.note.date===f.date){const w=D.note["why_"+S.lang]||D.note.why_en||[];if(w.length)h+=`<div class="h2">${t("why")}</div><div class="card"><ul>${w.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`}
     const b=f.backtest||{};
     h+=`<div class="h2">${t("sure")}</div><div class="card"><div class="grid2">
