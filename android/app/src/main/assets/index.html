@@ -110,6 +110,8 @@ const T = {
   fearT:"Fear meter",fearLearn:"Learning what's normal — levels appear after 10 days of data.",fearLv:{calm:"Calm",elevated:"Elevated",high:"High",extreme:"EXTREME",learning:"Learning"},fearStories:"stories today",fearNormal:"normal",
   folT:"Following (my idea vs TSMC)",folStart:"From {d} at {p}",folNow:"Now",folSince:"Since start",folVs:"TSMC since start",folTx:"TAIEX since start",folTarget:"To target {t}",folDip:"Worst close so far",folLeft:"{n} days left",folRace:"Race: first day to reach",folNone:"Not reached yet",folNo:"Waiting for the first daily update.",
   likeT:"Stocks like 國巨 (my checklist)",likeBot:"Bottom signal today",likeRules:"Down 40%+ in 60 days · 50%+ below 2-year high · revenue up 30%+ · big revenue · top-100 traded · healthy balance sheet",likeRoom:"Room to 2-year high",likeNear:"Almost (one check missing)",likeTest:"Tested: price part beat other big stocks in 8 of 10 past bottoms (+13.2% vs +10.8%, 20 days). Revenue and health parts NOT tested. Analysis only.",likeNet:"Net margin",likeDebt:"Debt",likeCover:"Cover",likeYoy:"Revenue vs last year",
+  sdChk:"Your checklist",sdNums:"Numbers",sdChart:"Last 130 trading days",sdHigh:"2-year high",sdNow:"Now",sdRoom:"Room to the high",sdRev:"Monthly revenue (NT$ billion)",sdYoy:"vs last year",sdMom:"vs last month",sdGM:"Gross margin",sdEPS:"Earnings per share (quarter)",sdQ:"Financials from",sdCh20:"Last 20 days",sdFol:"Your bet vs TSMC",sdTap:"Tap a stock for details",
+  ck_drop60:"Down 40%+ in 60 days",ck_room:"50%+ below 2-year high",ck_rev:"Revenue up 30%+ vs last year",ck_size:"Monthly revenue NT$10bn+",ck_liq:"Top-100 most traded",ck_health:"Healthy: profit, debt ≤60%, cover ≥1.2x",miss:"Missing",
   botT:"Bottom watch (is the drop ending?)",botScore:"Score",botNot:"Not in a big drop right now.",botIn:"TAIEX is {d}% below its 60-day high.",
   botTrack:"History (5y): score 2+ → up 20 days later {u}% of the time (avg {a}). Score 0 → {u0}% (coin flip), fell a further {f0} first.",
   botFS:"Foreign futures shorts",botPC:"Put/call ratio",botExtreme:"1-year extreme",botLow:"low (bearish lean)",
@@ -149,6 +151,8 @@ const T = {
   fearT:"恐慌指標",fearLearn:"正在學習正常水準 — 累積 10 天資料後顯示等級。",fearLv:{calm:"平靜",elevated:"升高",high:"偏高",extreme:"極高",learning:"學習中"},fearStories:"則新聞事件",fearNormal:"平常",
   folT:"追蹤中（我的想法 vs 台積電）",folStart:"{d} 起，起點 {p}",folNow:"現價",folSince:"自起點",folVs:"台積電自起點",folTx:"加權指數自起點",folTarget:"距目標 {t}",folDip:"至今最低收盤",folLeft:"剩 {n} 天",folRace:"競賽：最先到達的日期",folNone:"尚未到達",folNo:"等待第一次每日更新。",
   likeT:"像國巨的股票（我的條件）",likeBot:"今日止跌訊號",likeRules:"60日跌40%以上 · 低於2年高點50%以上 · 營收年增30%以上 · 營收規模大 · 成交量前100 · 財務健康",likeRoom:"距2年高點空間",likeNear:"差一點（缺一項）",likeTest:"已測試：價格部分在過去10次底部中8次勝過其他大型股（20天 +13.2% 對 +10.8%）。營收與財務部分尚未測試。僅供分析。",likeNet:"淨利率",likeDebt:"負債比",likeCover:"流動比",likeYoy:"營收年增",
+  sdChk:"你的條件檢查",sdNums:"數據",sdChart:"近130個交易日",sdHigh:"2年高點",sdNow:"現價",sdRoom:"距高點空間",sdRev:"單月營收（十億元）",sdYoy:"年增",sdMom:"月增",sdGM:"毛利率",sdEPS:"每股盈餘（單季）",sdQ:"財報期間",sdCh20:"近20日",sdFol:"你的賭注 vs 台積電",sdTap:"點股票看詳細",
+  ck_drop60:"60日跌40%以上",ck_room:"低於2年高點50%以上",ck_rev:"營收年增30%以上",ck_size:"單月營收100億以上",ck_liq:"成交量前100",ck_health:"財務健康：獲利、負債≤60%、流動比≥1.2",miss:"缺",
   botT:"止跌觀察（跌勢是否結束？）",botScore:"分數",botNot:"目前不在大跌之中。",botIn:"加權指數距 60 日高點 {d}%。",
   botTrack:"歷史（5年）：分數 2 以上 → 20 天後上漲機率 {u}%（平均 {a}）。分數 0 → {u0}%（擲硬幣），且平均先再跌 {f0}。",
   botFS:"外資台指期淨空單",botPC:"選擇權 P/C 比",botExtreme:"一年來最極端",botLow:"偏低（偏空）",
@@ -318,15 +322,44 @@ function followCard(){
     h+=`</div>`});
   return h;
 }
+const CKS=[["c_drop","drop60"],["c_room","room"],["c_rev","rev"],["c_size","size"],["c_liq","liq"],["c_health","health"]];
+function likeRow(x,near){
+  const miss=near&&x.missing?`<span class="chip" style="margin-left:6px">${t("miss")}: ${t("ck_"+x.missing)}</span>`:"";
+  return `<div class="it" onclick="stockDetail('${esc(x.code)}')"><div class="sp"><div class="nm" style="font-size:14px">${esc(x.name)} ${esc(x.code)}${miss}</div><div class="cd">${t("likeYoy")} ${pct(x.rev_yoy,0)} · ${t("likeNet")} ${num(x.net_margin)}% · ${t("likeDebt")} ${x.debt_ratio==null?"–":Math.round(x.debt_ratio*100)+"%"} · ${t("likeCover")} ${num(x.current_ratio)}x</div></div>
+    <div class="r"><b>${num(x.price)}</b><div class="cd">${pct(x.drop60,0)} · ${t("likeRoom")} ${pct(x.room_to_high,0)}</div></div></div>`;
+}
 function likeCard(){
   const l=D.like;if(!l)return "";
   let h=`<div class="h2">${t("likeT")}</div><div class="card"><div class="row"><div class="sp mut">${t("likeBot")}</div><div class="pct" style="color:${l.bottom_score>=2?"var(--up)":"var(--mut)"}">${l.bottom_score==null?"–":l.bottom_score}/4</div></div>
-    <div class="mut" style="margin-top:6px;font-size:12.5px">${t("likeRules")}</div><div class="list" style="margin-top:8px">`;
-  h+=l.list.map(x=>`<div class="it"><div class="sp"><div class="nm" style="font-size:14px">${esc(x.name)} ${esc(x.code)}</div><div class="cd">${t("likeYoy")} ${pct(x.rev_yoy,0)} · ${t("likeNet")} ${num(x.net_margin)}% · ${t("likeDebt")} ${Math.round((x.debt_ratio||0)*100)}% · ${t("likeCover")} ${num(x.current_ratio)}x</div></div>
-    <div class="r"><b>${num(x.price)}</b><div class="cd">${pct(x.drop60,0)} · ${t("likeRoom")} ${pct(x.room_to_high,0)}</div></div></div>`).join("");
-  h+=`</div>`;
-  if(l.near&&l.near.length)h+=`<div class="mut" style="margin-top:10px">${t("likeNear")}: ${l.near.map(x=>esc(x.name)).join("、")}</div>`;
+    <div class="mut" style="margin-top:6px;font-size:12.5px">${t("likeRules")}</div><div class="mut" style="margin-top:4px;font-size:12.5px">${t("sdTap")}</div><div class="list" style="margin-top:8px">`;
+  h+=l.list.map(x=>likeRow(x,false)).join("")+`</div>`;
+  if(l.near&&l.near.length)h+=`<div class="h2" style="margin:14px 0 0">${t("likeNear")}</div><div class="list" style="margin-top:4px">${l.near.map(x=>likeRow(x,true)).join("")}</div>`;
   return h+`<div class="mut" style="margin-top:10px;font-size:12.5px">${t("likeTest")}</div></div>`;
+}
+function stockDetail(code){
+  const l=D.like;if(!l)return;const x=[...l.list,...l.near].find(z=>z.code===code);if(!x)return;
+  const sr=x.series||[];let chart="";
+  if(sr.length>2){const mn=Math.min(...sr),mx=Math.max(...sr),W=300,H=110,pad=6;
+    const pts=sr.map((v,i)=>`${(i/(sr.length-1)*W).toFixed(1)},${(H-pad-(v-mn)/(mx-mn||1)*(H-2*pad)).toFixed(1)}`).join(" ");
+    const lastY=H-pad-(sr[sr.length-1]-mn)/(mx-mn||1)*(H-2*pad);
+    chart=`<div class="mut" style="margin-top:10px">${t("sdChart")}</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:120px;margin-top:4px"><polyline points="${pts}" fill="none" stroke="#7c8cff" stroke-width="2" stroke-linejoin="round"/><circle cx="${W}" cy="${lastY.toFixed(1)}" r="3.5" fill="#fff"/></svg>
+    <div class="row mut" style="font-size:12px"><span>${num(mn)}</span><div class="sp"></div><span>${num(mx)}</span></div>`}
+  const posPct=Math.max(2,Math.min(100,x.price/x.high*100));
+  const bar=`<div class="mut" style="margin-top:12px">${t("sdHigh")}: <b>${num(x.high)}</b> (${esc(x.high_date)}) · ${t("sdNow")} ${num(x.price)}</div><div style="height:10px;background:var(--card2);border-radius:6px;margin-top:6px;overflow:hidden"><div style="width:${posPct.toFixed(0)}%;height:100%;background:linear-gradient(90deg,#7c8cff,#5eead4)"></div></div><div class="cd" style="margin-top:4px">${t("sdRoom")}: ${pct(x.room_to_high,0)}</div>`;
+  const rows=CKS.map(([k,n])=>`<div class="it"><div class="sp" style="font-size:14px">${t("ck_"+n)}</div><div class="r">${x[k]?"✅":"❌"}</div></div>`).join("");
+  const g=(lab,val)=>`<div class="tile">${lab}<b style="font-size:16px">${val}</b></div>`;
+  let fol="";const f=D.follow&&D.follow.stocks&&D.follow.stocks.find(z=>z.code===code);
+  if(f)fol=`<div class="h2" style="margin:14px 0 6px">${t("sdFol")}</div><div class="grid2">${g(t("folSince"),pct(f.since_start))}${g(t("folVs"),pct(f.vs_since_start))}</div>`;
+  sheet(`<div class="cd">${esc(x.code)} · ${esc(x.industry||"")}</div><div class="mid">${esc(x.name)}</div>
+    <div class="row" style="margin-top:4px"><b style="font-size:26px">${num(x.price)}</b><span style="margin-left:10px">${pct(x.chg20,1)} <span class="cd">${t("sdCh20")}</span></span></div>${chart}${bar}
+    <div class="h2" style="margin:14px 0 4px">${t("sdChk")}</div><div class="list">${rows}</div>
+    <div class="h2" style="margin:14px 0 6px">${t("sdNums")}</div>
+    <div class="grid2">${g(t("sdRev"),num((x.rev_bn||0)/1000))}${g(t("sdYoy"),pct(x.rev_yoy,0))}</div>
+    <div class="grid2" style="margin-top:8px">${g(t("sdMom"),pct(x.rev_mom,0))}${g(t("sdGM"),x.gross_margin==null?"–":num(x.gross_margin)+"%")}</div>
+    <div class="grid2" style="margin-top:8px">${g(t("likeNet"),x.net_margin==null?"–":num(x.net_margin)+"%")}${g(t("sdEPS"),num(x.eps))}</div>
+    <div class="grid2" style="margin-top:8px">${g(t("likeDebt"),x.debt_ratio==null?"–":Math.round(x.debt_ratio*100)+"%")}${g(t("likeCover"),num(x.current_ratio)+"x")}</div>
+    <div class="mut" style="margin-top:8px">${t("sdQ")} ${esc(x.fin_period||"–")}</div>${fol}
+    <div class="mut" style="margin-top:12px;font-size:12.5px">${t("likeTest")}</div>`);
 }
 function moneyCard(){
   const m=D.report&&D.report.money;if(!m||!m.foreign)return "";
