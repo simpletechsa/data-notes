@@ -108,6 +108,8 @@ const T = {
   acc:"Forecast accuracy",settings:"Settings",lang:"Language",colors:"Up/down colors",colTW:"Taiwan (red = up)",colUS:"US (green = up)",
   evT:"Act today — events coming",evW:"Next 7 trading days",evNone:"No known events need action today.",evHits:"hits",evApprox:"date not confirmed",
   fearT:"Fear meter",fearLearn:"Learning what's normal — levels appear after 10 days of data.",fearLv:{calm:"Calm",elevated:"Elevated",high:"High",extreme:"EXTREME",learning:"Learning"},fearStories:"stories today",fearNormal:"normal",
+  folT:"Following (my idea vs TSMC)",folStart:"From {d} at {p}",folNow:"Now",folSince:"Since start",folVs:"TSMC since start",folTx:"TAIEX since start",folTarget:"To target {t}",folDip:"Worst close so far",folLeft:"{n} days left",folRace:"Race: first day to reach",folNone:"Not reached yet",folNo:"Waiting for the first daily update.",
+  likeT:"Stocks like 國巨 (my checklist)",likeBot:"Bottom signal today",likeRules:"Down 40%+ in 60 days · 50%+ below 2-year high · revenue up 30%+ · big revenue · top-100 traded · healthy balance sheet",likeRoom:"Room to 2-year high",likeNear:"Almost (one check missing)",likeTest:"Tested: price part beat other big stocks in 8 of 10 past bottoms (+13.2% vs +10.8%, 20 days). Revenue and health parts NOT tested. Analysis only.",likeNet:"Net margin",likeDebt:"Debt",likeCover:"Cover",likeYoy:"Revenue vs last year",
   botT:"Bottom watch (is the drop ending?)",botScore:"Score",botNot:"Not in a big drop right now.",botIn:"TAIEX is {d}% below its 60-day high.",
   botTrack:"History (5y): score 2+ → up 20 days later {u}% of the time (avg {a}). Score 0 → {u0}% (coin flip), fell a further {f0} first.",
   botFS:"Foreign futures shorts",botPC:"Put/call ratio",botExtreme:"1-year extreme",botLow:"low (bearish lean)",
@@ -145,6 +147,8 @@ const T = {
   acc:"預測準確度",settings:"設定",lang:"語言",colors:"漲跌顏色",colTW:"台灣（紅漲綠跌）",colUS:"美國（綠漲紅跌）",
   evT:"今天要注意 — 即將發生的事件",evW:"未來 7 個交易日",evNone:"今天沒有需要提前因應的已知事件。",evHits:"影響",evApprox:"日期未確定",
   fearT:"恐慌指標",fearLearn:"正在學習正常水準 — 累積 10 天資料後顯示等級。",fearLv:{calm:"平靜",elevated:"升高",high:"偏高",extreme:"極高",learning:"學習中"},fearStories:"則新聞事件",fearNormal:"平常",
+  folT:"追蹤中（我的想法 vs 台積電）",folStart:"{d} 起，起點 {p}",folNow:"現價",folSince:"自起點",folVs:"台積電自起點",folTx:"加權指數自起點",folTarget:"距目標 {t}",folDip:"至今最低收盤",folLeft:"剩 {n} 天",folRace:"競賽：最先到達的日期",folNone:"尚未到達",folNo:"等待第一次每日更新。",
+  likeT:"像國巨的股票（我的條件）",likeBot:"今日止跌訊號",likeRules:"60日跌40%以上 · 低於2年高點50%以上 · 營收年增30%以上 · 營收規模大 · 成交量前100 · 財務健康",likeRoom:"距2年高點空間",likeNear:"差一點（缺一項）",likeTest:"已測試：價格部分在過去10次底部中8次勝過其他大型股（20天 +13.2% 對 +10.8%）。營收與財務部分尚未測試。僅供分析。",likeNet:"淨利率",likeDebt:"負債比",likeCover:"流動比",likeYoy:"營收年增",
   botT:"止跌觀察（跌勢是否結束？）",botScore:"分數",botNot:"目前不在大跌之中。",botIn:"加權指數距 60 日高點 {d}%。",
   botTrack:"歷史（5年）：分數 2 以上 → 20 天後上漲機率 {u}%（平均 {a}）。分數 0 → {u0}%（擲硬幣），且平均先再跌 {f0}。",
   botFS:"外資台指期淨空單",botPC:"選擇權 P/C 比",botExtreme:"一年來最極端",botLow:"偏低（偏空）",
@@ -226,8 +230,8 @@ async function load(force){
     const [rep,fc,log,note,al,ast]=await Promise.all([fetchJ("report/latest.json"),fetchJ("report/forecast.json").catch(()=>null),
       fetchJ("forecast_log.csv",true).then(parseCSV).catch(()=>[]),fetchJ("report/morning_note.json").catch(()=>null),
       fetchJ("report/alerts_latest.json").catch(()=>null),fetchJ("report/alert_stats.json").catch(()=>null)]);
-    const [ev,fear,bot]=await Promise.all([fetchJ("report/events.json").catch(()=>null),fetchJ("report/fear.json").catch(()=>null),fetchJ("report/bottom.json").catch(()=>null)]);
-    D={report:rep,fc:fc,log:log,note:note,al:al,ast:ast,ev:ev,fear:fear,bot:bot,fetched:new Date().toISOString(),offline:false};
+    const [ev,fear,bot,fol,lik]=await Promise.all([fetchJ("report/events.json").catch(()=>null),fetchJ("report/fear.json").catch(()=>null),fetchJ("report/bottom.json").catch(()=>null),fetchJ("report/follow.json").catch(()=>null),fetchJ("report/like.json").catch(()=>null)]);
+    D={report:rep,fc:fc,log:log,note:note,al:al,ast:ast,ev:ev,fear:fear,bot:bot,follow:fol,like:lik,fetched:new Date().toISOString(),offline:false};
     put("cache",JSON.stringify(D));
   }catch(e){
     const c=get("cache");if(c){D=JSON.parse(c);D.offline=true}else{D.report=null}
@@ -299,6 +303,31 @@ function bottomCard(){
   h+=`</div><div class="mut" style="margin-top:8px">${t("botTrack").replace("{u}",Math.round(tr.score2.up*100)).replace("{a}","+"+(tr.score2.avg20*100).toFixed(1)+"%").replace("{u0}",Math.round(tr.score0.up*100)).replace("{f0}",(tr.score0.further*100).toFixed(1)+"%")}</div></div>`;
   return h;
 }
+function followCard(){
+  const f=D.follow;if(!f)return "";
+  if(!f.stocks||!f.stocks.length)return `<div class="h2">${t("folT")}</div><div class="card"><div class="mut">${t("folNo")}</div></div>`;
+  let h=`<div class="h2">${t("folT")}</div>`;
+  f.stocks.forEach(x=>{
+    h+=`<div class="card"><div class="row"><div class="sp"><div class="nm">${esc(S.lang==="zh"?x.zh:x.en)} ${esc(x.code)}</div><div class="cd">${t("folStart").replace("{d}",esc(x.start_date)).replace("{p}",num(x.start_price))} · ${t("folLeft").replace("{n}",x.days_left)}</div></div>
+      <div class="r"><b>${num(x.last)}</b><div class="cd">${esc(x.last_date)}</div></div></div>
+      <div class="grid2" style="margin-top:10px"><div class="tile">${t("folSince")}<b>${pct(x.since_start)}</b></div><div class="tile">${t("folVs")}<b>${pct(x.vs_since_start)}</b></div></div>
+      <div class="grid2" style="margin-top:8px"><div class="tile">${t("folTx")}<b>${pct(x.taiex_since_start)}</b></div><div class="tile">${t("folDip")}<b>${num(x.worst_close)}</b></div></div>
+      <div class="mut" style="margin-top:8px">${t("folTarget").replace("{t}",num(x.target))}: ${pct(x.to_target)}</div>`;
+    if(x.race){h+=`<div class="mut" style="margin-top:8px">${t("folRace")}:</div><div class="list">`;
+      x.race.forEach(r=>{h+=`<div class="it"><div class="sp" style="font-size:14px">+${Math.round(r.level*100)}%</div><div class="r cd">${esc(x.en)}: ${r.stock?esc(r.stock):t("folNone")}<br>TSMC: ${r.vs?esc(r.vs):t("folNone")}</div></div>`});h+=`</div>`}
+    h+=`</div>`});
+  return h;
+}
+function likeCard(){
+  const l=D.like;if(!l)return "";
+  let h=`<div class="h2">${t("likeT")}</div><div class="card"><div class="row"><div class="sp mut">${t("likeBot")}</div><div class="pct" style="color:${l.bottom_score>=2?"var(--up)":"var(--mut)"}">${l.bottom_score==null?"–":l.bottom_score}/4</div></div>
+    <div class="mut" style="margin-top:6px;font-size:12.5px">${t("likeRules")}</div><div class="list" style="margin-top:8px">`;
+  h+=l.list.map(x=>`<div class="it"><div class="sp"><div class="nm" style="font-size:14px">${esc(x.name)} ${esc(x.code)}</div><div class="cd">${t("likeYoy")} ${pct(x.rev_yoy,0)} · ${t("likeNet")} ${num(x.net_margin)}% · ${t("likeDebt")} ${Math.round((x.debt_ratio||0)*100)}% · ${t("likeCover")} ${num(x.current_ratio)}x</div></div>
+    <div class="r"><b>${num(x.price)}</b><div class="cd">${pct(x.drop60,0)} · ${t("likeRoom")} ${pct(x.room_to_high,0)}</div></div></div>`).join("");
+  h+=`</div>`;
+  if(l.near&&l.near.length)h+=`<div class="mut" style="margin-top:10px">${t("likeNear")}: ${l.near.map(x=>esc(x.name)).join("、")}</div>`;
+  return h+`<div class="mut" style="margin-top:10px;font-size:12.5px">${t("likeTest")}</div></div>`;
+}
 function moneyCard(){
   const m=D.report&&D.report.money;if(!m||!m.foreign)return "";
   const line=(lab,x)=>x?`<div class="it"><div class="sp"><div class="nm" style="font-size:14px">${lab}</div><div class="cd">${Math.abs(x.streak)} ${x.streak>=0?t("streakBuy"):t("streakSell")} · ${t("last5")} ${(x.sum5>0?"+":"")+num(x.sum5)}億</div></div>
@@ -341,7 +370,7 @@ function rToday(){
     }else h+=`<div class="mut">${t("scoreNone")}</div>`;
     h+=`</div>`;
   }
-  h+=fearCard()+bottomCard()+moneyCard();
+  h+=fearCard()+bottomCard()+likeCard()+followCard()+moneyCard();
   const hot=D.report.heat.filter(x=>x.level==="hot");
   h+=`<div class="h2">${t("mood")}</div><div class="card"><div class="mut">${t("hotNow")}</div><div style="margin-top:6px">${hot.map(x=>`<span class="chip lv-hot">${esc(nm(x))} ${x.trend?t("tr")[x.trend]:pct(x.r5)}</span>`).join("")}</div>
      <div class="mut" style="margin-top:10px">${t("aiAvg")}: <b>${Math.round(D.report.focus?.avg_heat||0)}</b>/100</div></div>`;
