@@ -128,32 +128,32 @@
 2026-11-24,news,asia_market,日韓股市,Japan / Korea market,1,122,72,7,0.527,0.527
 2026-11-24,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,170,21,61,-0.235,-0.471
 2026-11-24,news,memory,記憶體,Memory chips,2,166,45,25,0.126,0.251
-2026-11-24,news,oil_gold,油價 / 金價,Oil / Gold,1,178,39,57,-0.075,-0.075
-2026-11-24,news,trump,川普發言,Trump statements,3,345,39,84,-0.13,-0.391
+2026-11-24,news,oil_gold,油價 / 金價,Oil / Gold,1,177,39,56,-0.07,-0.07
+2026-11-24,news,trump,川普發言,Trump statements,3,344,39,83,-0.128,-0.384
 2026-11-24,news,tsmc,台積電,TSMC,2,137,58,7,0.372,0.745
 2026-11-24,news,tw_market,台股盤勢,Taiwan market,1,102,55,8,0.433,0.433
 2026-11-24,news,us_market,美股收盤原因,Why US market moved,1,131,70,26,0.321,0.321
-2026-11-24,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,207,10,106,-0.448,-0.895
+2026-11-24,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,206,10,105,-0.445,-0.89
 2026-11-24,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,120,27,24,0.025,0.025
-2026-11-25,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,348,62,52,0.031,0.062
-2026-11-25,news,asia_market,日韓股市,Japan / Korea market,1,127,7,72,-0.491,-0.491
-2026-11-25,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,191,17,91,-0.391,-0.782
-2026-11-25,news,memory,記憶體,Memory chips,2,206,26,71,-0.176,-0.353
-2026-11-25,news,oil_gold,油價 / 金價,Oil / Gold,1,205,28,74,-0.225,-0.225
-2026-11-25,news,trump,川普發言,Trump statements,3,316,8,185,-0.545,-1.634
-2026-11-25,news,tsmc,台積電,TSMC,2,125,10,39,-0.222,-0.443
-2026-11-25,news,tw_market,台股盤勢,Taiwan market,1,117,8,72,-0.514,-0.514
-2026-11-25,news,us_market,美股收盤原因,Why US market moved,1,138,18,65,-0.322,-0.322
-2026-11-25,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,187,10,99,-0.466,-0.932
+2026-11-25,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,350,62,53,0.028,0.056
+2026-11-25,news,asia_market,日韓股市,Japan / Korea market,1,129,7,73,-0.491,-0.491
+2026-11-25,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,192,17,92,-0.394,-0.788
+2026-11-25,news,memory,記憶體,Memory chips,2,208,26,72,-0.179,-0.359
+2026-11-25,news,oil_gold,油價 / 金價,Oil / Gold,1,205,28,75,-0.23,-0.23
+2026-11-25,news,trump,川普發言,Trump statements,3,324,8,190,-0.547,-1.64
+2026-11-25,news,tsmc,台積電,TSMC,2,126,10,39,-0.22,-0.44
+2026-11-25,news,tw_market,台股盤勢,Taiwan market,1,118,9,72,-0.508,-0.508
+2026-11-25,news,us_market,美股收盤原因,Why US market moved,1,139,19,65,-0.312,-0.312
+2026-11-25,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,191,10,102,-0.472,-0.944
 2026-11-25,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,105,18,14,-0.21,-0.21
-2026-11-26,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,106,12,21,-0.072,-0.145
-2026-11-26,news,asia_market,日韓股市,Japan / Korea market,1,23,4,5,0.015,0.015
-2026-11-26,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,51,5,21,-0.314,-0.627
-2026-11-26,news,memory,記憶體,Memory chips,2,40,7,3,0.1,0.2
-2026-11-26,news,oil_gold,油價 / 金價,Oil / Gold,1,51,12,19,-0.111,-0.111
-2026-11-26,news,trump,川普發言,Trump statements,3,69,2,29,-0.391,-1.174
-2026-11-26,news,tsmc,台積電,TSMC,2,52,1,4,-0.032,-0.064
-2026-11-26,news,tw_market,台股盤勢,Taiwan market,1,15,3,4,-0.067,-0.067
-2026-11-26,news,us_market,美股收盤原因,Why US market moved,1,48,6,22,-0.253,-0.253
-2026-11-26,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,31,0,19,-0.57,-1.14
-2026-11-26,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,16,4,2,-0.188,-0.188
+2026-11-26,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,149,19,29,-0.063,-0.125
+2026-11-26,news,asia_market,日韓股市,Japan / Korea market,1,49,15,10,0.102,0.102
+2026-11-26,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,81,10,40,-0.379,-0.757
+2026-11-26,news,memory,記憶體,Memory chips,2,73,19,4,0.187,0.374
+2026-11-26,news,oil_gold,油價 / 金價,Oil / Gold,1,80,17,32,-0.154,-0.154
+2026-11-26,news,trump,川普發言,Trump statements,3,115,4,52,-0.417,-1.252
+2026-11-26,news,tsmc,台積電,TSMC,2,73,4,7,-0.032,-0.064
+2026-11-26,news,tw_market,台股盤勢,Taiwan market,1,28,12,6,0.214,0.214
+2026-11-26,news,us_market,美股收盤原因,Why US market moved,1,68,9,33,-0.287,-0.287
+2026-11-26,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,56,1,34,-0.554,-1.107
+2026-11-26,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,28,7,6,-0.25,-0.25
