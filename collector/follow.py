@@ -76,6 +76,12 @@ def main():
             series.append({"d": str(dte.date()), "stock": round(v / p0 - 1, 4),
                            "vs": round(float(r.iloc[-1]) / ref0 - 1, 4) if len(r) else None,
                            "taiex": round(float(t.iloc[-1]) / tx0 - 1, 4) if len(t) else None})
+        # race: first day each side closed at +10/+20/+30/+50/+100% from the start
+        race = []
+        for lvl in (0.10, 0.20, 0.30, 0.50, 1.00):
+            a = next((x["d"] for x in series if x["stock"] >= lvl), None)
+            b = next((x["d"] for x in series if x["vs"] is not None and x["vs"] >= lvl), None)
+            race.append({"level": lvl, "stock": a, "vs": b})
         end = pd.Timestamp(s["end_date"])
         res.append({"code": s["code"], "en": s["name_en"], "zh": s["name_zh"], "start_date": s["start_date"], "start_price": p0,
                     "target": s["target"], "end_date": s["end_date"], "last_date": str(c.index[-1].date()), "last": last,
@@ -83,7 +89,7 @@ def main():
                     "worst_close": float(c.min()), "worst_dip": float(c.min() / p0 - 1), "best_close": float(c.max()),
                     "target_hit": bool((c >= s["target"]).any()), "days_left": max(0, (end - pd.Timestamp(now.date())).days),
                     "vs_code": s.get("vs", "2330"), "vs_since_start": float(series[-1]["vs"]) if series[-1]["vs"] is not None else None,
-                    "taiex_since_start": series[-1]["taiex"], "series": series[-130:]})
+                    "taiex_since_start": series[-1]["taiex"], "race": race, "series": series[-130:]})
     out = {"made": now.strftime("%Y-%m-%d %H:%M"), "stocks": res}
     vault.save_or_print(os.path.join(DATA, "report", "follow.json"), json.dumps(out, ensure_ascii=False))
     for r in res:
