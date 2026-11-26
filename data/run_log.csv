@@ -68,3 +68,14 @@ vault.NoKey: DATA_KEY is not set - private files are not written
 2026-11-25 23:33:06,alerts,88,catch-up: nothing missed ; news +555 new headlines ; fear.py done ; alerts.py done ; daily signals 147 rows,
 2026-11-26 02:53:05,tw_close,171,"catch-up: nothing missed ; prices +9 new rows, snapshots +29 ; futures +1, gap days +0, TAIEX fixes 0, foreign-futures +0, put/call +0 ; money-flow +6, per-stock +6, margin +3, all-stock flow +1874 ; revenue +0 ; news +570 new headlines ; ptt +45 new posts ; fear.py done ; market prices +1953 rows (1986 stocks) ; revenue(all) +0 ; analysis + report done ; forecast.py done ; alerts.py done ; bottom.py done ; calendar_events.py done ; fear.py done ; follow.py done ; daily signals 158 rows",
 2026-11-26 07:24:32,us_open,72,"catch-up: nothing missed ; prices +0 new rows, snapshots +29 ; money-flow +0, per-stock +0, margin +0, all-stock flow +0 ; news +573 new headlines ; ptt +53 new posts ; fear.py done ; daily signals 158 rows",
+2026-11-26 08:42:45,asia_open,85,"catch-up: nothing missed ; prices +7 new rows, snapshots +29 ; futures +1, gap days +0, TAIEX fixes 0, foreign-futures +0, put/call +0 ; news +569 new headlines ; ptt +39 new posts ; fear.py done ; forecast.py done ; calendar_events.py done ; bottom.py done ; alerts.py FAILED ; daily signals 158 rows","alerts.py failed: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 42, in write
+    f.write(enc(text.encode(""utf-8"")))
+            ~~~^^^^^^^^^^^^^^^^^^^^^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 31, in enc
+    return MAGIC + n + AESGCM(key()).encrypt(n, data, None)
+                              ~~~^^
+  File ""/home/claude/tw-stock-lab/collector/vault.py"", line 25, in key
+    raise NoKey(""DATA_KEY is not set - private files are not written"")
+vault.NoKey: DATA_KEY is not set - private files are not written
+"
