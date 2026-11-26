@@ -38,8 +38,9 @@ def dec(blob: bytes) -> bytes:
 
 def write(path: str, text: str):
     """Write `path`.enc (encrypted). Never leaves a plain copy."""
+    blob = enc(text.encode("utf-8"))  # encrypt FIRST: with no key this raises before the old file is touched
     with open(path + ".enc", "wb") as f:
-        f.write(enc(text.encode("utf-8")))
+        f.write(blob)
     if os.path.exists(path):
         os.remove(path)
 
