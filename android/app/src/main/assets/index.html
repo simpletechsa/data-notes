@@ -221,7 +221,8 @@ async function fetchJ(path,isText){
     plain=await crypto.subtle.decrypt({name:"AES-GCM",iv},ak,buf.slice(16+L));
   }else{
     const key=await getKey();if(!key)throw new Error("locked");
-    try{plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(2,14)},key,buf.slice(14))}catch(e){put("k","");put("rsa","");KEY=null;showLock();throw e}
+    if(buf.length<30)throw new Error("empty file");   // a broken or empty side file must never lock you out
+    try{plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:buf.slice(2,14)},key,buf.slice(14))}catch(e){if(path==="report/latest.json"){put("k","");put("rsa","");KEY=null;showLock()}throw e}
   }
   const txt=new TextDecoder().decode(plain);return isText?txt:JSON.parse(txt)}
 function parseCSV(txt){const lines=txt.replace(/^﻿/,"").trim().split(/\r?\n/);const h=lines.shift().split(",");return lines.map(l=>{const v=l.split(",");const o={};h.forEach((k,i)=>o[k]=v[i]);return o})}
