@@ -79,3 +79,4 @@ vault.NoKey: DATA_KEY is not set - private files are not written
     raise NoKey(""DATA_KEY is not set - private files are not written"")
 vault.NoKey: DATA_KEY is not set - private files are not written
 "
+2026-11-26 11:27:48,health,12,catch-up: nothing missed ; health +1949 ; daily signals 158 rows,health TWO margins: Expecting value: line 1 column 1 (char 0)
