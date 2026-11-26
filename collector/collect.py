@@ -300,6 +300,59 @@ def collect_revenue_all(log):
     return f"revenue(all) +{a}"
 
 
+def collect_health(log):
+    """Company health (profit margins, debt, cash cover) for every listed/OTC company, from the exchanges' public financial data.
+    First run also writes data/market/health_probe.txt with the field names each source really uses."""
+    probe, rows = [], {}
+    srcs = [("TW", "margins", "https://openapi.twse.com.tw/v1/opendata/t187ap17_L"),
+            ("TW", "balance", "https://openapi.twse.com.tw/v1/opendata/t187ap07_L_ci"),
+            ("TW", "income", "https://openapi.twse.com.tw/v1/opendata/t187ap06_L_ci"),
+            ("TWO", "margins", "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap17_O"),
+            ("TWO", "balance", "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap07_O_ci"),
+            ("TWO", "income", "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap06_O_ci")]
+
+    def pick(r, *names):
+        for k, v in r.items():
+            if any(n in k for n in names):
+                x = num(v)
+                if x is not None:
+                    return x
+        return None
+
+    for mk, kind, url in srcs:
+        try:
+            data = fetch_json(url, timeout=90)
+            probe.append(f"{mk} {kind} {url} rows={len(data)}")
+            if data:
+                probe.append("  keys: " + " | ".join(data[0].keys()))
+            for r in data:
+                code = str(r.get("公司代號", r.get("SecuritiesCompanyCode", ""))).strip()
+                if not (len(code) == 4 and code.isdigit()):
+                    continue
+                d = rows.setdefault(code, {"code": code, "market": mk})
+                d["period"] = f"{r.get('年度', r.get('Year', ''))}Q{r.get('季別', r.get('Season', ''))}"
+                if kind == "margins":
+                    d["gross_margin"] = pick(r, "毛利率")
+                    d["op_margin"] = pick(r, "營業利益率")
+                    d["net_margin"] = pick(r, "稅後純益率")
+                elif kind == "balance":
+                    ta, tl = pick(r, "資產總額", "資產總計"), pick(r, "負債總額", "負債總計")
+                    ca, cl = pick(r, "流動資產"), pick(r, "流動負債")
+                    d["debt_ratio"] = round(tl / ta, 4) if ta and tl is not None else None
+                    d["current_ratio"] = round(ca / cl, 2) if ca and cl else None
+                elif kind == "income":
+                    d["eps"] = pick(r, "基本每股盈餘")
+                    d["net_income"] = pick(r, "本期淨利", "淨利（淨損）")
+        except Exception as e:
+            probe.append(f"{mk} {kind} FAILED {e}")
+            log.append(f"health {mk} {kind}: {e}")
+    with open(os.path.join(DATA, "market", "health_probe.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(probe))
+    fields = ["code", "market", "period", "gross_margin", "op_margin", "net_margin", "debt_ratio", "current_ratio", "eps", "net_income"]
+    a = upsert_csv("market/health.csv", fields, list(rows.values()), ["code"])
+    return f"health +{a}"
+
+
 def collect_market_prices(log):
     """Last month of daily prices for every stock (fills gaps automatically). Saved per month."""
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -672,6 +725,7 @@ PLAN = {
     "us_open": ["prices", "twse", "news", "ptt", "fear"],
     # 05:40 Taipei - US closed: final prices + why it moved
     "us_close": ["prices", "news", "ptt", "fear"],
+    "health": ["health"],
     "all": ["prices", "twse", "revenue", "news", "ptt", "market", "revenue_all", "analyze"],
 }
 
@@ -705,6 +759,8 @@ def main():
                 done.append(collect_ptt(a.mode, log))
             elif step == "market":
                 done.append(collect_market_prices(log))
+            elif step == "health":
+                done.append(collect_health(log))
             elif step == "revenue_all":
                 done.append(collect_revenue_all(log))
             elif step == "analyze":
