@@ -67,7 +67,15 @@ def main():
            "tested": {"price_part": {"episodes": 10, "wins": 8, "avg_ret": 0.132, "other_big": 0.108, "avg_dip": -0.055}, "revenue_part": None, "health_part": None},
            "count": int(len(core)), "list": core.drop(columns=["checks"]).round(4).to_dict("records"),
            "near": near.drop(columns=["checks"]).round(4).to_dict("records")}
-    vault.save_or_print(os.path.join(DATA, "report", "like.json"), json.dumps(out, ensure_ascii=False))
+    def clean(x):  # phone apps cannot read NaN in JSON: turn missing numbers into null
+        if isinstance(x, float) and x != x:
+            return None
+        if isinstance(x, dict):
+            return {k: clean(v) for k, v in x.items()}
+        if isinstance(x, list):
+            return [clean(v) for v in x]
+        return x
+    vault.save_or_print(os.path.join(DATA, "report", "like.json"), json.dumps(clean(out), ensure_ascii=False, allow_nan=False))
     print(f"like-Yageo list: {len(core)} stocks (bottom score {out['bottom_score']})", ", ".join(core.name.head(12)))
 
 
