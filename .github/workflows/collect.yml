@@ -8,6 +8,10 @@ on:
     - cron: "40 8 * * 1-5"    # 16:40 Taipei Mon-Fri  - Taiwan close + money flow 台股收盤＋法人
     - cron: "50 14 * * 1-5"   # 22:50 Taipei Mon-Fri  - US open + margin 美股開盤＋融資融券
     - cron: "40 21 * * 1-5"   # 05:40 Taipei Tue-Sat  - US close 美股收盤
+    - cron: "17 0 * * 1-5"    # 08:17 backup twin of the 08:40 run (GitHub often runs the scheduled ones hours late or drops them)
+    - cron: "17 8 * * 1-5"    # 16:17 backup twin of the 16:40 run
+    - cron: "58 14 * * 1-5"   # 22:58 backup twin of the 22:50 run
+    - cron: "17 21 * * 1-5"   # 05:17 backup twin of the 05:40 run
     - cron: "20 1 * * 1-5"    # 09:20 Taipei - alert check
     - cron: "1 2 * * 1-5"     # 10:00 Taipei - alert check
     - cron: "1 4 * * 1-5"     # 12:00 Taipei - alert check
@@ -41,10 +45,10 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.mode }}" ]; then echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT; exit 0; fi
           case "${{ github.event.schedule }}" in
-            "40 0 * * 1-5")  echo "mode=asia_open" >> $GITHUB_OUTPUT ;;
-            "40 8 * * 1-5")  echo "mode=tw_close"  >> $GITHUB_OUTPUT ;;
-            "50 14 * * 1-5") echo "mode=us_open"   >> $GITHUB_OUTPUT ;;
-            "40 21 * * 1-5") echo "mode=us_close"  >> $GITHUB_OUTPUT ;;
+            "40 0 * * 1-5"|"17 0 * * 1-5")  echo "mode=asia_open" >> $GITHUB_OUTPUT ;;
+            "40 8 * * 1-5"|"17 8 * * 1-5")  echo "mode=tw_close"  >> $GITHUB_OUTPUT ;;
+            "50 14 * * 1-5"|"58 14 * * 1-5") echo "mode=us_open"   >> $GITHUB_OUTPUT ;;
+            "40 21 * * 1-5"|"17 21 * * 1-5") echo "mode=us_close"  >> $GITHUB_OUTPUT ;;
             "20 1 * * 1-5")  echo "mode=alerts" >> $GITHUB_OUTPUT; echo "tag=0920" >> $GITHUB_OUTPUT ;;
             "1 2 * * 1-5")   echo "mode=alerts" >> $GITHUB_OUTPUT; echo "tag=1000" >> $GITHUB_OUTPUT ;;
             "1 4 * * 1-5")   echo "mode=alerts" >> $GITHUB_OUTPUT; echo "tag=1200" >> $GITHUB_OUTPUT ;;
