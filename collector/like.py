@@ -44,7 +44,8 @@ def main():
                      "rev_yoy": float(rv.yoy_pct[c]) / 100, "rev_mom": float(rv.mom_pct[c]) / 100, "rev_bn": float(rv.revenue[c]) / 1e6,
                      "liq_rank": int(liq.get(c, 9999)),
                      "gross_margin": hl.gross_margin.get(c), "net_margin": hl.net_margin.get(c), "debt_ratio": hl.debt_ratio.get(c),
-                     "current_ratio": hl.current_ratio.get(c), "eps": hl.eps.get(c), "net_income": hl.net_income.get(c), "fin_period": hl.period.get(c)})
+                     "current_ratio": hl.current_ratio.get(c), "eps": hl.eps.get(c), "net_income": hl.net_income.get(c), "fin_period": hl.period.get(c),
+                     "series": [round(float(v), 2) for v in g.tail(130).values], "series_from": str(g.index[-min(130, len(g))].date())})
     D = pd.DataFrame(rows)
     D["c_drop"] = D.drop60 <= -0.40
     D["c_rev"] = D.rev_yoy >= 0.30
@@ -55,7 +56,9 @@ def main():
     D["c_health"] = (D.net_income > 0) & (D.debt_ratio <= 0.60) & (D.current_ratio >= 1.2)
     D["checks"] = D[["c_drop", "c_rev", "c_size", "c_liq", "c_room", "c_health"]].sum(axis=1)
     core = D[(D.checks == 6)].sort_values("rev_bn", ascending=False)
-    near = D[(D.checks == 5) & D.c_drop & D.c_rev].sort_values("rev_bn", ascending=False).head(15)
+    near = D[(D.checks == 5) & D.c_drop & D.c_rev].sort_values("rev_bn", ascending=False).head(15).copy()
+    names = {"c_drop": "drop60", "c_rev": "rev", "c_size": "size", "c_liq": "liq", "c_room": "room", "c_health": "health"}
+    near["missing"] = near.apply(lambda r: next((v for k, v in names.items() if not r[k]), ""), axis=1)
     bs = None
     try:
         bs = json.loads(vault.read(os.path.join(DATA, "report", "bottom.json")))
