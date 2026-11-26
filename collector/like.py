@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Stocks like Yageo / 像國巨的股票 — Johnny's checklist, shown next to the market bottom signal.
-Checks (his guides):  big drop in 60 days, strong revenue growth, big monthly revenue, liquid, far below its high.
+Checks (his guides):  big drop in 60 days, at least 50% below its 2-year high, strong revenue growth, big monthly revenue, liquid, far below its high.
 Test status shown with each check:
   price part (big liquid stocks down 30%+ at a bottom signal): TESTED, beat other big stocks in 8 of 10 episodes (+13.2% vs +10.8% in 20 days)
   revenue part: NOT TESTED (no revenue history yet)
@@ -39,7 +39,7 @@ def main():
             continue
         l = g.iloc[-1]
         rows.append({"code": c, "name": uni.loc[c, "name"], "industry": uni.loc[c, "industry"], "price": round(float(l), 2),
-                     "drop60": float(l / g.tail(60).max() - 1), "drop_high": float(l / g.max() - 1), "chg20": float(l / g.iloc[-21] - 1) if len(g) > 21 else None,
+                     "drop60": float(l / g.tail(60).max() - 1), "drop_high": float(l / g.max() - 1), "high": round(float(g.max()), 2), "high_date": str(g.idxmax().date()), "room_to_high": float(g.max() / l - 1), "chg20": float(l / g.iloc[-21] - 1) if len(g) > 21 else None,
                      "rev_yoy": float(rv.yoy_pct[c]) / 100, "rev_mom": float(rv.mom_pct[c]) / 100, "rev_bn": float(rv.revenue[c]) / 1e6,
                      "liq_rank": int(liq.get(c, 9999))})
     D = pd.DataFrame(rows)
@@ -47,9 +47,10 @@ def main():
     D["c_rev"] = D.rev_yoy >= 0.30
     D["c_size"] = D.rev_bn >= 10
     D["c_liq"] = D.liq_rank <= 100
-    D["checks"] = D[["c_drop", "c_rev", "c_size", "c_liq"]].sum(axis=1)
-    core = D[(D.checks == 4)].sort_values("rev_bn", ascending=False)
-    near = D[(D.checks == 3) & D.c_drop & D.c_rev].sort_values("rev_bn", ascending=False).head(15)
+    D["c_room"] = D.drop_high <= -0.50  # at least 50% below its highest price in the 2 years we hold
+    D["checks"] = D[["c_drop", "c_rev", "c_size", "c_liq", "c_room"]].sum(axis=1)
+    core = D[(D.checks == 5)].sort_values("rev_bn", ascending=False)
+    near = D[(D.checks == 4) & D.c_drop & D.c_rev].sort_values("rev_bn", ascending=False).head(15)
     bs = None
     try:
         bs = json.loads(vault.read(os.path.join(DATA, "report", "bottom.json")))
@@ -57,7 +58,7 @@ def main():
         pass
     out = {"date": str(last_day.date()), "made": datetime.now(TPE).strftime("%Y-%m-%d %H:%M"),
            "bottom_score": bs["score"] if bs else None, "bottom_in_drop": bs["in_drop"] if bs else None,
-           "rules": {"drop60": -0.40, "rev_yoy": 0.30, "rev_bn": 10, "liq_rank": 100},
+           "rules": {"drop60": -0.40, "rev_yoy": 0.30, "rev_bn": 10, "liq_rank": 100, "drop_high": -0.50, "high_window": "2 years"},
            "tested": {"price_part": {"episodes": 10, "wins": 8, "avg_ret": 0.132, "other_big": 0.108, "avg_dip": -0.055}, "revenue_part": None},
            "count": int(len(core)), "list": core.drop(columns=["checks"]).round(4).to_dict("records"),
            "near": near.drop(columns=["checks"]).round(4).to_dict("records")}
