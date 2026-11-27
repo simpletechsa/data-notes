@@ -82,7 +82,7 @@
 2026-11-19,news,us_market,美股收盤原因,Why US market moved,1,61,11,11,-0.002,-0.002
 2026-11-19,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,149,4,87,-0.548,-1.096
 2026-11-19,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,10,3,2,-0.5,-0.5
-2026-11-20,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,224,18,33,-0.067,-0.134
+2026-11-20,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,223,18,33,-0.067,-0.135
 2026-11-20,news,asia_market,日韓股市,Japan / Korea market,1,127,6,89,-0.655,-0.655
 2026-11-20,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,167,20,82,-0.352,-0.705
 2026-11-20,news,memory,記憶體,Memory chips,2,178,19,41,-0.124,-0.247
@@ -129,7 +129,7 @@
 2026-11-24,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,168,21,60,-0.232,-0.464
 2026-11-24,news,memory,記憶體,Memory chips,2,165,45,25,0.126,0.253
 2026-11-24,news,oil_gold,油價 / 金價,Oil / Gold,1,176,39,56,-0.07,-0.07
-2026-11-24,news,trump,川普發言,Trump statements,3,343,39,83,-0.128,-0.385
+2026-11-24,news,trump,川普發言,Trump statements,3,342,39,83,-0.129,-0.386
 2026-11-24,news,tsmc,台積電,TSMC,2,137,58,7,0.372,0.745
 2026-11-24,news,tw_market,台股盤勢,Taiwan market,1,101,54,8,0.434,0.434
 2026-11-24,news,us_market,美股收盤原因,Why US market moved,1,129,68,26,0.31,0.31
@@ -148,23 +148,23 @@
 2026-11-25,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,105,18,14,-0.21,-0.21
 2026-11-26,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,288,37,51,-0.046,-0.093
 2026-11-26,news,asia_market,日韓股市,Japan / Korea market,1,127,41,30,0.058,0.058
-2026-11-26,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,192,20,96,-0.399,-0.799
+2026-11-26,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,193,20,97,-0.402,-0.805
 2026-11-26,news,memory,記憶體,Memory chips,2,183,54,14,0.193,0.386
 2026-11-26,news,oil_gold,油價 / 金價,Oil / Gold,1,172,33,63,-0.162,-0.162
-2026-11-26,news,trump,川普發言,Trump statements,3,278,14,136,-0.422,-1.266
+2026-11-26,news,trump,川普發言,Trump statements,3,279,14,136,-0.421,-1.262
 2026-11-26,news,tsmc,台積電,TSMC,2,144,17,15,0.019,0.037
 2026-11-26,news,tw_market,台股盤勢,Taiwan market,1,94,44,24,0.191,0.191
 2026-11-26,news,us_market,美股收盤原因,Why US market moved,1,133,25,52,-0.149,-0.149
 2026-11-26,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,182,7,101,-0.499,-0.998
 2026-11-26,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,81,18,19,-0.198,-0.198
-2026-11-27,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,180,10,24,-0.078,-0.156
-2026-11-27,news,asia_market,日韓股市,Japan / Korea market,1,106,46,6,0.384,0.384
-2026-11-27,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,104,12,40,-0.256,-0.513
-2026-11-27,news,memory,記憶體,Memory chips,2,127,29,13,0.12,0.239
-2026-11-27,news,oil_gold,油價 / 金價,Oil / Gold,1,148,33,35,-0.014,-0.014
-2026-11-27,news,trump,川普發言,Trump statements,3,182,10,75,-0.352,-1.055
-2026-11-27,news,tsmc,台積電,TSMC,2,104,35,5,0.288,0.577
-2026-11-27,news,tw_market,台股盤勢,Taiwan market,1,92,40,12,0.304,0.304
-2026-11-27,news,us_market,美股收盤原因,Why US market moved,1,68,21,13,0.145,0.145
-2026-11-27,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,136,11,71,-0.434,-0.868
+2026-11-27,news,ai_nvidia,AI / 輝達 / 黃仁勳,AI / Nvidia / Jensen Huang,2,195,11,27,-0.082,-0.164
+2026-11-27,news,asia_market,日韓股市,Japan / Korea market,1,114,47,7,0.357,0.357
+2026-11-27,news,fed_rates,聯準會 升息/降息,Fed rate hike/cut,2,114,13,45,-0.269,-0.538
+2026-11-27,news,memory,記憶體,Memory chips,2,140,32,14,0.123,0.246
+2026-11-27,news,oil_gold,油價 / 金價,Oil / Gold,1,158,35,36,-0.006,-0.006
+2026-11-27,news,trump,川普發言,Trump statements,3,197,10,80,-0.35,-1.051
+2026-11-27,news,tsmc,台積電,TSMC,2,114,37,6,0.272,0.544
+2026-11-27,news,tw_market,台股盤勢,Taiwan market,1,102,44,14,0.294,0.294
+2026-11-27,news,us_market,美股收盤原因,Why US market moved,1,78,24,14,0.152,0.152
+2026-11-27,news,war_geo,戰爭 / 地緣政治,War / geopolitics,2,140,11,73,-0.436,-0.871
 2026-11-27,ptt,ptt_mood,PTT股票版情緒,PTT Stock board mood,1,33,7,6,-0.091,-0.091
