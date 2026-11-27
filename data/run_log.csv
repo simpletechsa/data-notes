@@ -107,3 +107,4 @@ vault.NoKey: DATA_KEY is not set - private files are not written
 2026-11-27 17:46:10,alerts,62,catch-up: nothing missed ; news +569 new headlines ; fear.py done ; alerts.py done ; daily signals 169 rows,"news '美股 收盤': not well-formed (invalid token): line 1, column 11930"
 2026-11-27 18:27:03,alerts,60,catch-up: nothing missed ; news +559 new headlines ; fear.py done ; alerts.py done ; daily signals 169 rows,"news '美股 收盤': not well-formed (invalid token): line 1, column 13245"
 2026-11-27 21:37:56,alerts,85,catch-up: nothing missed ; news +572 new headlines ; fear.py done ; alerts.py done ; daily signals 169 rows,"news '美股 收盤': not well-formed (invalid token): line 1, column 13005"
+2026-11-27 22:59:52,alerts,71,catch-up: nothing missed ; news +574 new headlines ; fear.py done ; alerts.py done ; daily signals 169 rows,"news '美股 收盤': not well-formed (invalid token): line 1, column 15255"
